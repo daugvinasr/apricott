@@ -7,10 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+*.md
 node_modules
 dist
 dist-ssr
 *.local
+site
 
 # Editor directories and files
 .vscode/*
@@ -25,7 +27,7 @@ dist-ssr
 !.vscode/
 !.vscode/settings.json
 !.vscode/extensions.json
-
+output
 # dotenv environment variable files
 .env
 .env.*
