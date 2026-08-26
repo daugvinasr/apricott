@@ -49,7 +49,7 @@ export class Transport {
   readonly reportId: number;
   readonly payloadLength: number;
 
-  private inputListener: ((data: DataView) => void) | null = null;
+  private inputListener: ((data: Uint8Array) => void) | null = null;
 
   private constructor(device: HIDDevice, info: FeatureReportInfo) {
     this.device = device;
@@ -58,7 +58,7 @@ export class Transport {
 
     device.oninputreport = (e) => {
       if (e.reportId === this.reportId) {
-        this.inputListener?.(e.data);
+        this.inputListener?.(new Uint8Array(e.data.buffer, e.data.byteOffset, e.data.byteLength));
       }
     };
   }
@@ -104,7 +104,7 @@ export class Transport {
     return payload;
   }
 
-  onInputReport(listener: ((data: DataView) => void) | null): void {
+  onInputReport(listener: ((data: Uint8Array) => void) | null): void {
     this.inputListener = listener;
   }
 
