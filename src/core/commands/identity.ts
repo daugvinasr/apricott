@@ -46,10 +46,13 @@ export async function readIdentity(t: Bus): Promise<Identity> {
   const r = (await t.read(Op.identity)).expect(1, "Identity marker");
   const model = r.u8(0);
 
+  const linkByte = r.u8(1);
+
   const link: Link = t.wireless
-    ? { kind: "dongle", receiver8k: r.u8(1) === RECEIVER_8K }
+    ? { kind: "dongle", receiver8k: linkByte === RECEIVER_8K }
     : { kind: "wired" };
-  const body = r.drop(t.wireless ? 3 : 2);
+
+  const body = r.drop(linkByte === RECEIVER_8K || t.wireless ? 3 : 2);
   const sensor = body.u8(0);
 
   if (!isSensor(sensor)) {

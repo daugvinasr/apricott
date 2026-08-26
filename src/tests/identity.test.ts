@@ -25,6 +25,26 @@ it("reads dongle identity with shifted link byte", async () => {
   });
 });
 
+it("shifts the wired body when the link byte is 2", async () => {
+  const { bus } = fakeBus(() => [1, 2, 0x02, 0xfa, Sensor.PAW3395]);
+  expect(await readIdentity(bus)).toEqual({
+    model: 2,
+    sensor: Sensor.PAW3395,
+    link: { kind: "wired" },
+    colour: undefined,
+  });
+});
+
+it("reads dongle identity with an unshifted link byte", async () => {
+  const { bus } = fakeBus(() => [1, 9, 0x01, 0, Sensor.PAW3950], true);
+  expect(await readIdentity(bus)).toEqual({
+    model: 9,
+    sensor: Sensor.PAW3950,
+    link: { kind: "dongle", receiver8k: false },
+    colour: undefined,
+  });
+});
+
 it("rejects bad marker and unknown sensor", async () => {
   await expect(readIdentity(fakeBus(() => [0]).bus)).rejects.toThrow(TransportError);
   await expect(readIdentity(fakeBus(() => [1, 2, 0, 0x55]).bus)).rejects.toThrow(TransportError);
