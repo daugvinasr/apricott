@@ -20,7 +20,7 @@ it("reads dongle identity with shifted link byte", async () => {
   expect(await readIdentity(bus)).toEqual({
     model: 2,
     sensor: Sensor.PAW3395,
-    link: { kind: "dongle", receiver8k: true },
+    link: { kind: "wireless", receiver8k: true },
     colour: undefined,
   });
 });
@@ -40,7 +40,7 @@ it("reads dongle identity with an unshifted link byte", async () => {
   expect(await readIdentity(bus)).toEqual({
     model: 9,
     sensor: Sensor.PAW3950,
-    link: { kind: "dongle", receiver8k: false },
+    link: { kind: "wireless", receiver8k: false },
     colour: undefined,
   });
 });

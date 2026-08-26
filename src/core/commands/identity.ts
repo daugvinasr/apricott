@@ -33,7 +33,7 @@ export type Sensor = (typeof Sensor)[keyof typeof Sensor];
 const isModel = (byte: number): byte is ModelId => byte in MODEL_NAMES;
 const isSensor = isValueOf(Sensor);
 
-export type Link = { kind: "wired" } | { kind: "dongle"; receiver8k: boolean };
+export type Link = { kind: "wired" } | { kind: "wireless"; receiver8k: boolean };
 
 export interface Identity {
   model: ModelId;
@@ -49,7 +49,7 @@ export async function readIdentity(t: Bus): Promise<Identity> {
   const linkByte = r.u8(1);
 
   const link: Link = t.wireless
-    ? { kind: "dongle", receiver8k: linkByte === RECEIVER_8K }
+    ? { kind: "wireless", receiver8k: linkByte === RECEIVER_8K }
     : { kind: "wired" };
 
   const body = r.drop(linkByte === RECEIVER_8K || t.wireless ? 3 : 2);

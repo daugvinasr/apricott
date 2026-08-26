@@ -36,7 +36,7 @@ function App() {
 
     const id = await readIdentity(t);
     setIdentity(id);
-    setAwake(id.link.kind === "dongle" ? await isAwake(t) : true);
+    setAwake(id.link.kind === "wireless" ? await isAwake(t) : true);
 
     await refreshAngleSnapping(t);
   }
