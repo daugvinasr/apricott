@@ -21,7 +21,7 @@ export function pollingIndexToHz(index: number): PollingRate {
 }
 
 // Over 1k do not allow to choose performance mode
-// and always show visually corded (don't write it)
+// and always show visually "corded" (don't write it)
 export const isHighRate = (hz: number): boolean => hz >= 2000;
 
 export async function readPollingRate(t: Bus): Promise<PollingRate> {
