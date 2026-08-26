@@ -1,52 +1,5 @@
-import { Sensor } from "./identity";
-
-export interface DpiRange {
-  min: number;
-  max: number;
-  step: number;
-}
-
-export const SENSOR_DPI = {
-  [Sensor.PAW3395]: { min: 50, max: 32000, step: 50 },
-  [Sensor.PAW3950]: { min: 50, max: 45000, step: 50 },
-} satisfies Record<Sensor, DpiRange>;
-
-export function dpiToHw(sensor: Sensor, dpi: number): number {
-  const { min, max, step } = SENSOR_DPI[sensor];
-  const clamped = Math.min(max, Math.max(min, dpi));
-  return Math.floor((clamped - min) / step);
-}
-
-export function hwToDpi(sensor: Sensor, hw: number): number {
-  const { min, step } = SENSOR_DPI[sensor];
-  return min + hw * step;
-}
-
-export function snapDpi(sensor: Sensor, dpi: number): number {
-  return hwToDpi(sensor, dpiToHw(sensor, dpi));
-}
-
-export const POLLING_RATES = [1000, 500, 250, 125, 8000, 4000, 2000] as const;
-
-export type PollingRate = (typeof POLLING_RATES)[number];
-
-const POLLING_RATE_SET: ReadonlySet<number> = new Set(POLLING_RATES);
-
-export const isPollingRate = (hz: number): hz is PollingRate => POLLING_RATE_SET.has(hz);
-
-export const pollingHzToIndex = (hz: PollingRate): number => POLLING_RATES.indexOf(hz);
-
-export function pollingIndexToHz(index: number): PollingRate {
-  const hz = POLLING_RATES[index];
-
-  if (hz === undefined) {
-    throw new RangeError(`Unsupported polling rate index ${index}`);
-  }
-
-  return hz;
-}
-
-export const isHighRate = (hz: number): boolean => hz >= 2000;
+import { invert, packLe32, unpackLe32 } from "../bytes";
+import { type Bus, Op, readSub } from "./shared";
 
 export const BUTTON_MATRIX = {
   left: 0,
@@ -94,12 +47,6 @@ export type ButtonAction =
   | { type: "special"; kind: SpecialKind }
   | { type: "unknown"; code: number };
 
-const invert = <K extends string>(rec: Record<K, number>): ReadonlyMap<number, K> => {
-  const map = new Map<number, K>();
-  for (const k in rec) map.set(rec[k], k);
-  return map;
-};
-
 const MOUSE_BY_SELECTOR = invert(MOUSE_SELECTOR);
 const DPI_OP_BY_SUBOP = invert(DPI_SUBOP);
 const SPECIAL_BY_CODE = invert(SPECIAL_CODE);
@@ -114,40 +61,26 @@ const ActionClass = {
   keys3: 0x80,
 } as const;
 
-type Bytes = [k1: number, k2: number, k3: number, k4: number];
-
-const u8 = (n: number) => n & 0xff;
-
-const pack = ([k1, k2, k3, k4]: Bytes): number =>
-  ((u8(k4) << 24) | (u8(k3) << 16) | (u8(k2) << 8) | u8(k1)) >>> 0;
-
-const unpack = (code: number): Bytes => [
-  code & 0xff,
-  (code >>> 8) & 0xff,
-  (code >>> 16) & 0xff,
-  (code >>> 24) & 0xff,
-];
-
 export function encodeAction(a: ButtonAction): number {
   switch (a.type) {
     case "disabled":
       return 0;
     case "mouse":
-      return pack([ActionClass.mouse, 0, MOUSE_SELECTOR[a.button], 0]);
+      return packLe32([ActionClass.mouse, 0, MOUSE_SELECTOR[a.button], 0]);
     case "key": {
       const mod = a.modifiers.reduce((m, x) => m | modBit(x), 0);
-      return pack([ActionClass.key, mod, a.usage, a.usage2]);
+      return packLe32([ActionClass.key, mod, a.usage, a.usage2]);
     }
     case "keys3":
-      return pack([ActionClass.keys3, ...a.usages]);
+      return packLe32([ActionClass.keys3, ...a.usages]);
     case "consumer":
-      return pack([ActionClass.consumer, 0, a.usage, a.usage >> 8]);
+      return packLe32([ActionClass.consumer, 0, a.usage, a.usage >> 8]);
     case "dpi":
-      return pack([ActionClass.dpi, 0, DPI_SUBOP[a.op], 0]);
+      return packLe32([ActionClass.dpi, 0, DPI_SUBOP[a.op], 0]);
     case "dpiSet":
-      return pack([ActionClass.dpi, 0, DPI_SET_SUBOP, a.stage]);
+      return packLe32([ActionClass.dpi, 0, DPI_SET_SUBOP, a.stage]);
     case "macro":
-      return pack([ActionClass.macro, 0, a.bufferId, 0]);
+      return packLe32([ActionClass.macro, 0, a.bufferId, 0]);
     case "special":
       return SPECIAL_CODE[a.kind];
     case "unknown":
@@ -157,7 +90,7 @@ export function encodeAction(a: ButtonAction): number {
 
 export function decodeAction(raw: number): ButtonAction {
   const code = raw >>> 0;
-  const [k1, k2, k3, k4] = unpack(code);
+  const [k1, k2, k3, k4] = unpackLe32(code);
   const unknown: ButtonAction = { type: "unknown", code };
 
   switch (k1) {
@@ -197,30 +130,11 @@ export function decodeAction(raw: number): ButtonAction {
   }
 }
 
-export interface InputReport {
-  charging: boolean;
-  batteryPercent: number;
-  pollingRateHz: PollingRate;
-  activeStage: number;
-  debounceMs: number;
-  activeProfile: number;
-  motionSync: boolean;
-  lodValue: number;
+export async function readButton(t: Bus, button: ButtonName): Promise<ButtonAction> {
+  const r = await readSub(t, Op.button, BUTTON_MATRIX[button]);
+  return decodeAction(r.le32(0));
 }
 
-export function parseInputReport(d: Uint8Array): InputReport {
-  const b0 = d[0] ?? 0;
-  const b1 = d[1] ?? 0;
-  const b2 = d[2] ?? 0;
-  const b6 = d[6] ?? 0;
-  return {
-    charging: (b0 & 0x80) !== 0,
-    batteryPercent: b0 & 0x7f,
-    pollingRateHz: pollingIndexToHz(b1 & 0x0f),
-    activeStage: b1 >> 4,
-    debounceMs: b2 & 0x3f,
-    activeProfile: b2 >> 6,
-    motionSync: (b6 & 0x0f) !== 0,
-    lodValue: b6 >> 4,
-  };
+export async function writeButton(t: Bus, button: ButtonName, action: ButtonAction): Promise<void> {
+  return t.write(Op.button, [BUTTON_MATRIX[button], ...unpackLe32(encodeAction(action))]);
 }
