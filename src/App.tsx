@@ -55,7 +55,8 @@ function App() {
           {JSON.stringify(
             {
               ...identity,
-              name: MODEL_NAMES[identity.model] + (identity.sensor === Sensor.PAW3950 ? " Pro" : ""),
+              name:
+                MODEL_NAMES[identity.model] + (identity.sensor === Sensor.PAW3950 ? " Pro" : ""),
               sensor: `${SENSOR_LABELS[identity.sensor]} (0x${identity.sensor.toString(16)})`,
               awake,
             },
