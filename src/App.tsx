@@ -1,6 +1,14 @@
 import * as stylex from "@stylexjs/stylex";
 import { useState } from "react";
-import { type Identity, isAwake, MODEL_NAMES, readIdentity, Sensor } from "./core/identity";
+import {
+  type Identity,
+  isAwake,
+  MODEL_NAMES,
+  readAngleSnapping,
+  readIdentity,
+  Sensor,
+  writeAngleSnapping,
+} from "./core/commands";
 import { DEVICE_FILTERS, Transport } from "./core/transport";
 
 const colorStyles = stylex.create({
@@ -11,18 +19,14 @@ const colorStyles = stylex.create({
 
 const SENSOR_LABELS = Object.fromEntries(Object.entries(Sensor).map(([name, id]) => [id, name]));
 
-const OP_SENSOR_OPTIONS = 0x04;
-const SUB_ANGLE_SNAPPING = 0x03;
-
 function App() {
   const [transport, setTransport] = useState<Transport | null>(null);
   const [angleSnapping, setAngleSnapping] = useState<boolean | null>(null);
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [awake, setAwake] = useState<boolean | null>(null);
 
-  async function readAngleSnapping(t: Transport) {
-    const r = await t.read(OP_SENSOR_OPTIONS, [SUB_ANGLE_SNAPPING]);
-    setAngleSnapping(r[2] === 1);
+  async function refreshAngleSnapping(t: Transport) {
+    setAngleSnapping(await readAngleSnapping(t));
   }
 
   async function connect() {
@@ -32,17 +36,17 @@ function App() {
 
     const id = await readIdentity(t);
     setIdentity(id);
-    setAwake(id.wireless ? await isAwake(t) : true);
+    setAwake(id.link.kind === "dongle" ? await isAwake(t) : true);
 
-    await readAngleSnapping(t);
+    await refreshAngleSnapping(t);
   }
 
   async function toggleAngleSnapping() {
     if (!transport || angleSnapping === null) {
       return;
     }
-    await transport.write(OP_SENSOR_OPTIONS, [SUB_ANGLE_SNAPPING, angleSnapping ? 0 : 1]);
-    await readAngleSnapping(transport);
+    await writeAngleSnapping(transport, !angleSnapping);
+    await refreshAngleSnapping(transport);
   }
 
   return (

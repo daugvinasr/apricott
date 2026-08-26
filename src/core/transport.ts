@@ -1,3 +1,7 @@
+import { Frame, hex } from "./bytes";
+import type { Bus } from "./commands/shared";
+import { TransportError } from "./errors";
+
 export const VENDOR_ID_PIXART = 0x093a;
 export const PRODUCT_ID_WIRED = 0x622c;
 export const PRODUCT_ID_DONGLE = 0x522c;
@@ -19,9 +23,6 @@ const WRITE_GAP_MS = 150;
 const READ_GAP_MS = 30;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-const hex = (n: number) => `0x${n.toString(16).padStart(2, "0")}`;
-
-export class TransportError extends Error {}
 
 interface FeatureReportInfo {
   reportId: number;
@@ -44,10 +45,11 @@ function findFeatureReport(device: HIDDevice): FeatureReportInfo | null {
   return { reportId, payloadLength };
 }
 
-export class Transport {
+export class Transport implements Bus {
   readonly device: HIDDevice;
   readonly reportId: number;
   readonly payloadLength: number;
+  readonly wireless: boolean; // using wireless dongle
 
   private inputListener: ((data: Uint8Array) => void) | null = null;
 
@@ -55,6 +57,7 @@ export class Transport {
     this.device = device;
     this.reportId = info.reportId;
     this.payloadLength = info.payloadLength;
+    this.wireless = device.productId === PRODUCT_ID_DONGLE;
 
     device.oninputreport = (e) => {
       if (e.reportId === this.reportId) {
@@ -108,7 +111,7 @@ export class Transport {
     this.inputListener = listener;
   }
 
-  write(op: number, args: number[] = []): Promise<void> {
+  async write(op: number, args: number[] = []): Promise<void> {
     const payload = this.buildPayload(op, args);
     return this.enqueue(async () => {
       await this.device.sendFeatureReport(this.reportId, payload);
@@ -116,7 +119,7 @@ export class Transport {
     });
   }
 
-  read(op: number, args: number[] = []): Promise<Uint8Array> {
+  async read(op: number, args: number[] = []): Promise<Frame> {
     const readOp = op | READ_FLAG;
     const payload = this.buildPayload(readOp, args);
 
@@ -128,13 +131,13 @@ export class Transport {
       // receiveFeatureReport INCLUDES the leading report-ID byte; strip it.
       const rdata = new Uint8Array(view.buffer, view.byteOffset + 1, view.byteLength - 1).slice();
 
-      const echo = rdata[0];
-
-      if (echo !== readOp) {
-        throw new TransportError(`Echo mismatch: sent ${hex(readOp)}, got ${hex(echo ?? -1)}`);
+      if (rdata.length !== this.payloadLength) {
+        throw new TransportError(
+          `Short frame for ${hex(readOp)}: got ${rdata.length} bytes, expected ${this.payloadLength}`,
+        );
       }
 
-      return rdata;
+      return new Frame(rdata).expect(readOp, "Op echo");
     });
   }
 }
