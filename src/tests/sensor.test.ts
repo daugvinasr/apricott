@@ -38,6 +38,6 @@ it("splits sensor mode and high-fps bit", async () => {
 
 it("writes sensor mode preserving high-fps", async () => {
   const { bus, writes } = fakeBus();
-  await writeSensorMode(bus, { performance: PerformanceMode.corded, highFps: true });
+  await writeSensorMode(bus, { performance: PerformanceMode.wired, highFps: true });
   expect(writes).toEqual([{ op: 0x04, args: [5, 0x82] }]);
 });
