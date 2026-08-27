@@ -58,7 +58,7 @@ export const writeMotionSync = (t: Bus, on: boolean) => writeFlag(t, Sub.motionS
 export const PerformanceMode = {
   lowPower: 0,
   highPerformance: 1,
-  corded: 2,
+  wired: 2,
 } as const;
 
 export type PerformanceMode = (typeof PerformanceMode)[keyof typeof PerformanceMode];
@@ -69,7 +69,7 @@ const HIGH_FPS_BIT = 0x80;
 
 export interface SensorMode {
   performance: PerformanceMode;
-  highFps: boolean; // Only corded PAW3950
+  highFps: boolean; // only wired PAW3950
 }
 
 export async function readSensorMode(t: Bus): Promise<SensorMode> {
