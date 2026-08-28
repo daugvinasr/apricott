@@ -19,7 +19,7 @@ export const DEVICE_FILTERS: HIDDeviceFilter[] = [
 const TARGET = VENDOR_USAGE_PAGE * 0x10000 + VENDOR_FEATURE_USAGE;
 
 const READ_FLAG = 0x80;
-const WRITE_GAP_MS = 150;
+const WRITE_GAP_MS = 500;
 const READ_GAP_MS = 30;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
