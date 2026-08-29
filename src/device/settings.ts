@@ -1,4 +1,12 @@
 import {
+  DpiAxis,
+  type DpiStage,
+  readDpiStage,
+  readStages,
+  type Sensor,
+  type StageConfig,
+  writeDpiStage,
+  writeStages,
   readAngleSnapping,
   readMotionSync,
   readRippleControl,
@@ -70,3 +78,30 @@ export const rippleControlSetting: DeviceSetting<boolean> = {
   read: readRippleControl,
   write: writeRippleControl,
 };
+
+export const stagesSetting: DeviceSetting<StageConfig> = {
+  key: "stages",
+  read: readStages,
+  write: writeStages,
+  equals: (a, b) => a.count === b.count && a.active === b.active && a.dpiEffect === b.dpiEffect,
+};
+
+export interface DpiStagePair {
+  x: DpiStage;
+  y: DpiStage;
+}
+
+export function dpiStageSetting(sensor: Sensor, stage: number): DeviceSetting<DpiStagePair> {
+  return {
+    key: `dpi:${stage}`,
+    read: async (bus) => ({
+      x: await readDpiStage(bus, sensor, stage, DpiAxis.x),
+      y: await readDpiStage(bus, sensor, stage, DpiAxis.y),
+    }),
+    write: async (bus, { x, y }) => {
+      await writeDpiStage(bus, sensor, stage, DpiAxis.x, x);
+      await writeDpiStage(bus, sensor, stage, DpiAxis.y, y);
+    },
+    equals: (a, b) => a.x.dpi === b.x.dpi && a.y.dpi === b.y.dpi,
+  };
+}

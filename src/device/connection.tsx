@@ -9,6 +9,7 @@ import {
   DeviceContext,
   useConnection,
 } from "./context";
+import { useInputReports } from "./useInputReports";
 
 function createDeviceQueryClient(): QueryClient {
   return new QueryClient({
@@ -77,6 +78,12 @@ export function Connected({ children }: { children: ReactNode }) {
   if (!device) {
     return null;
   }
+
+  return <ConnectedInner device={device}>{children}</ConnectedInner>;
+}
+
+function ConnectedInner({ device, children }: { device: Device; children: ReactNode }) {
+  useInputReports(device);
 
   return (
     <DeviceContext.Provider value={device}>
