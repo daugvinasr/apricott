@@ -1,3 +1,4 @@
+import type { Link } from "./identity";
 import { type Bus, Op } from "./shared";
 
 export const POLLING_RATES = [1000, 500, 250, 125, 8000, 4000, 2000] as const;
@@ -23,6 +24,11 @@ export function pollingIndexToHz(index: number): PollingRate {
 // Over 1k do not allow to choose performance mode
 // and always show visually "wired" (don't write it)
 export const isHighRate = (hz: number): boolean => hz >= 2000;
+
+// Only the 8K receiver goes above 1000 Hz
+export function supportedPollingRates(link: Link): readonly PollingRate[] {
+  return link.kind === "wireless" && link.receiver8k ? POLLING_RATES : POLLING_RATES.slice(0, 4);
+}
 
 export async function readPollingRate(t: Bus): Promise<PollingRate> {
   const r = await t.read(Op.pollingRate);

@@ -1,4 +1,5 @@
 import { expect, it } from "vite-plus/test";
+import { Sensor } from "../core/commands/identity";
 import { TransportError } from "../core/errors";
 import { fakeBus } from "./fake-bus";
 import {
@@ -6,6 +7,7 @@ import {
   readAngleSnapping,
   readLiftOff,
   readSensorMode,
+  supportedLiftOffs,
   PerformanceMode,
   writeMotionSync,
   writeSensorMode,
@@ -40,4 +42,9 @@ it("writes sensor mode preserving high-fps", async () => {
   const { bus, writes } = fakeBus();
   await writeSensorMode(bus, { performance: PerformanceMode.wired, highFps: true });
   expect(writes).toEqual([{ op: 0x04, args: [5, 0x82] }]);
+});
+
+it("offers 0.7 mm lift-off only on PAW3950", () => {
+  expect(supportedLiftOffs(Sensor.PAW3395)).toEqual([LiftOff.mm1, LiftOff.mm2]);
+  expect(supportedLiftOffs(Sensor.PAW3950)).toEqual([LiftOff.mm1, LiftOff.mm2, LiftOff.mm07]);
 });

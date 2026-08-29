@@ -7,6 +7,7 @@ import {
   pollingHzToIndex,
   pollingIndexToHz,
   readPollingRate,
+  supportedPollingRates,
   writePollingRate,
 } from "../core/commands/polling";
 
@@ -40,5 +41,20 @@ describe("polling codec", () => {
     expect(isHighRate(1000)).toBe(false);
     expect(isHighRate(2000)).toBe(true);
     expect(isHighRate(8000)).toBe(true);
+  });
+});
+
+describe("supportedPollingRates", () => {
+  it("caps wired and 1K dongle at 1000 Hz", () => {
+    expect(supportedPollingRates({ kind: "wired" })).toEqual([1000, 500, 250, 125]);
+    expect(supportedPollingRates({ kind: "wireless", receiver8k: false })).toEqual([
+      1000, 500, 250, 125,
+    ]);
+  });
+
+  it("offers every rate on the 8K receiver", () => {
+    expect(supportedPollingRates({ kind: "wireless", receiver8k: true })).toEqual([
+      ...POLLING_RATES,
+    ]);
   });
 });
