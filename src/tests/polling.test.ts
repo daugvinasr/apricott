@@ -9,7 +9,7 @@ import {
   readPollingRate,
   supportedPollingRates,
   writePollingRate,
-} from "../core/commands/polling";
+} from "../core/commands/polling-rate";
 
 it("reads polling index from rdata[1]", async () => {
   const { bus } = fakeBus(() => [4]);

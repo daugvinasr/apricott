@@ -1,9 +1,12 @@
 export { type Bus, MAX_STAGES, Op } from "./shared";
-export * from "./polling";
+export * from "./polling-rate";
 export * from "./dpi";
 export * from "./stages";
 export * from "./sensor";
+export * from "./lift-off";
 export * from "./timing";
+export * from "./debounce";
+export * from "./sleep";
 export * from "./buttons";
 export * from "./identity";
 export * from "./input-report";
