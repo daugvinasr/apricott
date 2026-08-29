@@ -8,8 +8,6 @@ import { debounceSetting, motionSyncSetting, pollingRateSetting, stagesSetting }
 
 const INPUT_REPORT_KEY = ["inputReport"];
 
-// Settings the device also broadcasts in its input report. A report only patches caches that a
-// real read has already populated, so `setting.read` stays the source of truth.
 function mirror<T>(setting: DeviceSetting<T>, next: (report: InputReport, prev: T) => T) {
   return (queries: QueryClient, report: InputReport) =>
     queries.setQueryData<T>([setting.key], (prev) =>

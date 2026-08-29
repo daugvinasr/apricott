@@ -6,10 +6,7 @@ export interface DeviceSetting<T> {
   key: string;
   read(bus: Bus): Promise<T>;
   write(bus: Bus, value: T): Promise<void>;
-  // Optional incremental commit: write only what differs from `prev` and return the read-back
-  // value. Falls back to full write + read when absent or when nothing is cached yet.
   update?: (bus: Bus, next: T, prev: T) => Promise<T>;
-  // Properties, not methods: avoids the unbound-method lint at the call site.
   equals?: (a: T, b: T) => boolean;
 }
 
