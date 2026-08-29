@@ -6,7 +6,7 @@ export interface DeviceSetting<T> {
   key: string;
   read(bus: Bus): Promise<T>;
   write(bus: Bus, value: T): Promise<void>;
-  equals?(a: T, b: T): boolean;
+  equals?: (a: T, b: T) => boolean;
 }
 
 // Should never happen
