@@ -143,11 +143,12 @@ export default function DpiPanel() {
   const dpi = useDeviceSetting(dpiStagesSetting(identity.sensor));
   const busy = useDeviceBusy();
 
+  const [forceSeparate, setForceSeparate] = useState(false);
+
   const cfg = stages.pending ?? stages.value;
   const pairs = dpi.pending ?? dpi.value;
 
   const anyDiffers = pairs?.some((p) => p.x.dpi !== p.y.dpi) ?? false;
-  const [forceSeparate, setForceSeparate] = useState(false);
   const separateXY = forceSeparate || anyDiffers;
 
   const setPair = (stage: number, next: DpiStagePair) =>
