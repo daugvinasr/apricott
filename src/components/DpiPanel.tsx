@@ -1,9 +1,8 @@
 import { MAX_DPI_STAGES, SENSOR_DPI, type Sensor, snapDpi } from "../core/commands";
-import { type DpiStagePair, dpiStageSetting, stagesSetting } from "../device/settings";
+import { type DpiStagePair, dpiStagesSetting, stagesSetting } from "../device/settings";
 import { useConnectedDevice } from "../device/context";
 import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
-import { useMutation, useQueries } from "@tanstack/react-query";
 import { useState } from "react";
 
 const styles = stylex.create({
@@ -30,6 +29,10 @@ const styles = stylex.create({
   },
 });
 
+function withDpi(pair: DpiStagePair, x: number, y: number): DpiStagePair {
+  return { x: { ...pair.x, dpi: x }, y: { ...pair.y, dpi: y } };
+}
+
 function DpiSlider({
   label,
   sensor,
@@ -39,7 +42,7 @@ function DpiSlider({
 }: {
   label: string;
   sensor: Sensor;
-  value: number | undefined;
+  value: number;
   disabled: boolean;
   onCommit: (dpi: number) => void;
 }) {
@@ -61,15 +64,15 @@ function DpiSlider({
         min={min}
         max={max}
         step={step}
-        value={shown ?? min}
-        disabled={disabled || value === undefined}
+        value={shown}
+        disabled={disabled}
         onChange={(e) => setDraft(snapDpi(sensor, Number(e.target.value)))}
         onPointerUp={commit}
         onKeyUp={commit}
         onBlur={commit}
         {...stylex.props(styles.slider)}
       />
-      <span {...stylex.props(styles.amount)}>{shown ?? ""}</span>
+      <span {...stylex.props(styles.amount)}>{shown}</span>
     </>
   );
 }
@@ -77,116 +80,80 @@ function DpiSlider({
 function DpiStageRow({
   sensor,
   stage,
+  pair,
   isActive,
   separateXY,
+  disabled,
   onActivate,
+  onChange,
 }: {
   sensor: Sensor;
   stage: number;
+  pair: DpiStagePair;
   isActive: boolean;
   separateXY: boolean;
+  disabled: boolean;
   onActivate: () => void;
+  onChange: (pair: DpiStagePair) => void;
 }) {
-  const setting = dpiStageSetting(sensor, stage);
-  const pair = useDeviceSetting(setting);
-  const busy = useDeviceBusy();
-
-  const current = pair.pending ?? pair.value;
   const name = `Stage ${stage + 1}`;
-
-  const setBoth = (dpi: number) =>
-    current && pair.set({ x: { ...current.x, dpi }, y: { ...current.y, dpi } });
-  const setX = (dpi: number) => current && pair.set({ ...current, x: { ...current.x, dpi } });
-  const setY = (dpi: number) => current && pair.set({ ...current, y: { ...current.y, dpi } });
+  const slider = (label: string, value: number, onCommit: (dpi: number) => void) => (
+    <DpiSlider
+      label={`${name} ${label}`}
+      sensor={sensor}
+      value={value}
+      disabled={disabled}
+      onCommit={onCommit}
+    />
+  );
 
   return (
-    <div>
-      <div {...stylex.props(styles.row)}>
-        <button
-          role="radio"
-          aria-checked={isActive}
-          aria-label={name}
-          disabled={busy}
-          onClick={onActivate}
-          {...stylex.props(isActive && styles.active)}
-        >
-          {stage + 1}
-        </button>
-        {separateXY ? (
-          <div {...stylex.props(styles.axes)}>
-            <div {...stylex.props(styles.row)}>
-              <span>X</span>
-              <DpiSlider
-                label={`${name} X DPI`}
-                sensor={sensor}
-                value={current?.x.dpi}
-                disabled={busy}
-                onCommit={setX}
-              />
-            </div>
-            <div {...stylex.props(styles.row)}>
-              <span>Y</span>
-              <DpiSlider
-                label={`${name} Y DPI`}
-                sensor={sensor}
-                value={current?.y.dpi}
-                disabled={busy}
-                onCommit={setY}
-              />
-            </div>
+    <div {...stylex.props(styles.row)}>
+      <button
+        role="radio"
+        aria-checked={isActive}
+        aria-label={name}
+        disabled={disabled}
+        onClick={onActivate}
+        {...stylex.props(isActive && styles.active)}
+      >
+        {stage + 1}
+      </button>
+      {separateXY ? (
+        <div {...stylex.props(styles.axes)}>
+          <div {...stylex.props(styles.row)}>
+            <span>X</span>
+            {slider("X DPI", pair.x.dpi, (dpi) => onChange(withDpi(pair, dpi, pair.y.dpi)))}
           </div>
-        ) : (
-          <DpiSlider
-            label={`${name} DPI`}
-            sensor={sensor}
-            value={current?.x.dpi}
-            disabled={busy}
-            onCommit={setBoth}
-          />
-        )}
-      </div>
-      {pair.error && <p role="alert">{pair.error.message}</p>}
+          <div {...stylex.props(styles.row)}>
+            <span>Y</span>
+            {slider("Y DPI", pair.y.dpi, (dpi) => onChange(withDpi(pair, pair.x.dpi, dpi)))}
+          </div>
+        </div>
+      ) : (
+        slider("DPI", pair.x.dpi, (dpi) => onChange(withDpi(pair, dpi, dpi)))
+      )}
     </div>
   );
 }
 
 export default function DpiPanel() {
-  const { identity, transport, queries } = useConnectedDevice();
+  const { identity } = useConnectedDevice();
   const stages = useDeviceSetting(stagesSetting);
+  const dpi = useDeviceSetting(dpiStagesSetting(identity.sensor));
   const busy = useDeviceBusy();
 
   const cfg = stages.pending ?? stages.value;
-  const count = cfg?.count ?? 0;
+  const pairs = dpi.pending ?? dpi.value;
 
-  // Subscribe to the per-stage caches (rows do the fetching) to derive whether any X != Y.
-  const pairs = useQueries({
-    queries: Array.from({ length: count }, (_, i) => {
-      const setting = dpiStageSetting(identity.sensor, i);
-      return {
-        queryKey: [setting.key],
-        queryFn: (): Promise<DpiStagePair> => setting.read(transport),
-        enabled: false,
-      };
-    }),
-    combine: (results) => results.map((r) => r.data),
-  });
-  const anyDiffers = pairs.some((p) => p && p.x.dpi !== p.y.dpi);
-
+  const anyDiffers = pairs?.some((p) => p.x.dpi !== p.y.dpi) ?? false;
   const [forceSeparate, setForceSeparate] = useState(false);
   const separateXY = forceSeparate || anyDiffers;
 
-  // Turning the toggle off re-syncs Y to X on every stage that differs.
-  const syncXY = useMutation({
-    mutationFn: async () => {
-      for (const [i, p] of pairs.entries()) {
-        if (!p || p.x.dpi === p.y.dpi) continue;
-        const setting = dpiStageSetting(identity.sensor, i);
-        const next = { ...p, y: { ...p.y, dpi: p.x.dpi } };
-        await setting.write(transport, next);
-        queries.setQueryData([setting.key], await setting.read(transport));
-      }
-    },
-  });
+  const setPair = (stage: number, next: DpiStagePair) =>
+    pairs && dpi.set(pairs.map((p, i) => (i === stage ? next : p)));
+
+  const syncXY = () => pairs && dpi.set(pairs.map((p) => withDpi(p, p.x.dpi, p.x.dpi)));
 
   return (
     <div>
@@ -198,7 +165,7 @@ export default function DpiPanel() {
           disabled={busy}
           onChange={(e) => {
             setForceSeparate(e.target.checked);
-            if (!e.target.checked && anyDiffers) syncXY.mutate();
+            if (!e.target.checked && anyDiffers) syncXY();
           }}
         />
         Adjust X/Y separately
@@ -230,19 +197,24 @@ export default function DpiPanel() {
       </div>
       <div role="radiogroup" aria-label="Active stage">
         {cfg &&
-          Array.from({ length: cfg.count }, (_, i) => (
-            <DpiStageRow
-              key={i}
-              sensor={identity.sensor}
-              stage={i}
-              isActive={i === cfg.active}
-              separateXY={separateXY}
-              onActivate={() => stages.set({ ...cfg, active: i })}
-            />
-          ))}
+          pairs
+            ?.slice(0, cfg.count)
+            .map((pair, i) => (
+              <DpiStageRow
+                key={i}
+                sensor={identity.sensor}
+                stage={i}
+                pair={pair}
+                isActive={i === cfg.active}
+                separateXY={separateXY}
+                disabled={busy}
+                onActivate={() => stages.set({ ...cfg, active: i })}
+                onChange={(next) => setPair(i, next)}
+              />
+            ))}
       </div>
       {stages.error && <p role="alert">{stages.error.message}</p>}
-      {syncXY.error && <p role="alert">{syncXY.error.message}</p>}
+      {dpi.error && <p role="alert">{dpi.error.message}</p>}
     </div>
   );
 }

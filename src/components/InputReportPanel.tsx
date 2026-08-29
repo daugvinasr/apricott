@@ -1,9 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { INPUT_REPORT_KEY } from "../device/useInputReports";
-import type { InputReport } from "../core/commands";
+import { useInputReport } from "../device/useInputReports";
 
 export default function InputReportPanel() {
-  const report = useQuery<InputReport>({ queryKey: INPUT_REPORT_KEY, enabled: false }).data;
+  const report = useInputReport();
 
   if (!report) {
     return (

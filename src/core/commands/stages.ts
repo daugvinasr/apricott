@@ -1,5 +1,4 @@
-import { MAX_DPI_STAGES } from "./dpi";
-import { assertRange, type Bus, Op } from "./shared";
+import { assertRange, type Bus, MAX_DPI_STAGES, Op } from "./shared";
 
 export interface StageConfig {
   count: number;

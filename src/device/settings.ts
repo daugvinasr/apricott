@@ -1,5 +1,6 @@
 import {
   DpiAxis,
+  MAX_DPI_STAGES,
   type DpiStage,
   readDpiStage,
   readStages,
@@ -91,17 +92,31 @@ export interface DpiStagePair {
   y: DpiStage;
 }
 
-export function dpiStageSetting(sensor: Sensor, stage: number): DeviceSetting<DpiStagePair> {
+const STAGE_INDICES = Array.from({ length: MAX_DPI_STAGES }, (_, i) => i);
+
+// All hardware stages as one value; the device only exposes per-axis reads/writes, so a commit
+// rewrites every stage. Keeps X/Y sync and cross-stage derivations atomic in the cache.
+export function dpiStagesSetting(sensor: Sensor): DeviceSetting<DpiStagePair[]> {
   return {
-    key: `dpi:${stage}`,
-    read: async (bus) => ({
-      x: await readDpiStage(bus, sensor, stage, DpiAxis.x),
-      y: await readDpiStage(bus, sensor, stage, DpiAxis.y),
-    }),
-    write: async (bus, { x, y }) => {
-      await writeDpiStage(bus, sensor, stage, DpiAxis.x, x);
-      await writeDpiStage(bus, sensor, stage, DpiAxis.y, y);
+    key: "dpi",
+    read: async (bus) => {
+      const pairs: DpiStagePair[] = [];
+      for (const stage of STAGE_INDICES) {
+        pairs.push({
+          x: await readDpiStage(bus, sensor, stage, DpiAxis.x),
+          y: await readDpiStage(bus, sensor, stage, DpiAxis.y),
+        });
+      }
+      return pairs;
     },
-    equals: (a, b) => a.x.dpi === b.x.dpi && a.y.dpi === b.y.dpi,
+    write: async (bus, pairs) => {
+      for (const [stage, { x, y }] of pairs.entries()) {
+        await writeDpiStage(bus, sensor, stage, DpiAxis.x, x);
+        await writeDpiStage(bus, sensor, stage, DpiAxis.y, y);
+      }
+    },
+    equals: (a, b) =>
+      a.length === b.length &&
+      a.every((p, i) => p.x.dpi === b[i]?.x.dpi && p.y.dpi === b[i]?.y.dpi),
   };
 }

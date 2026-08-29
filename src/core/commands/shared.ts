@@ -17,6 +17,8 @@ export const Op = {
   identity: 0x0f,
 } as const;
 
+export const MAX_DPI_STAGES = 6;
+
 export function assertRange(name: string, value: number, min: number, max: number): void {
   if (!Number.isInteger(value) || value < min || value > max) {
     throw new RangeError(`${name} must be an integer in ${min}..${max}, got ${value}`);

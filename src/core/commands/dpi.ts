@@ -1,8 +1,6 @@
 import { hex, le16Bytes } from "../bytes";
 import { Sensor } from "./identity";
-import { assertRange, type Bus, Op, readSub } from "./shared";
-
-export const MAX_DPI_STAGES = 6;
+import { assertRange, type Bus, MAX_DPI_STAGES, Op, readSub } from "./shared";
 
 export interface DpiRange {
   min: number;

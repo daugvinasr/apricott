@@ -6,7 +6,7 @@ export interface DeviceSetting<T> {
   key: string;
   read(bus: Bus): Promise<T>;
   write(bus: Bus, value: T): Promise<void>;
-  equals?: (a: T, b: T) => boolean;
+  equals?: (a: T, b: T) => boolean; // property, not method: avoids the unbound-method lint at the call site
 }
 
 // Should never happen
