@@ -7,6 +7,7 @@ import LiftOffPanel from "./components/LiftOffPanel";
 import SleepTimerPanel from "./components/SleepTimerPanel";
 import DebouncePanel from "./components/DebouncePanel";
 import PerformanceModePanel from "./components/PerformanceModePanel";
+import SensorTogglesPanel from "./components/SensorTogglesPanel";
 
 const colorStyles = stylex.create({
   button: {
@@ -48,6 +49,7 @@ function DevicePanel() {
         <SleepTimerPanel />
         <DebouncePanel />
         <PerformanceModePanel />
+        <SensorTogglesPanel />
       </Connected>
     </div>
   );

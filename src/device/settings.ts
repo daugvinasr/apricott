@@ -1,4 +1,10 @@
 import {
+  readAngleSnapping,
+  readMotionSync,
+  readRippleControl,
+  writeAngleSnapping,
+  writeMotionSync,
+  writeRippleControl,
   readSensorMode,
   writeSensorMode,
   type SensorMode,
@@ -45,4 +51,22 @@ export const performanceModeSetting: DeviceSetting<SensorMode> = {
   read: readSensorMode,
   write: writeSensorMode,
   equals: (a, b) => a.performance === b.performance && a.highFps === b.highFps,
+};
+
+export const angleSnappingSetting: DeviceSetting<boolean> = {
+  key: "angleSnapping",
+  read: readAngleSnapping,
+  write: writeAngleSnapping,
+};
+
+export const motionSyncSetting: DeviceSetting<boolean> = {
+  key: "motionSync",
+  read: readMotionSync,
+  write: writeMotionSync,
+};
+
+export const rippleControlSetting: DeviceSetting<boolean> = {
+  key: "rippleControl",
+  read: readRippleControl,
+  write: writeRippleControl,
 };
