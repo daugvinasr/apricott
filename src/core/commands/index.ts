@@ -1,5 +1,5 @@
 export { type Bus, MAX_STAGES, Op } from "./shared";
-export * from "./polling";
+export * from "./polling-rate";
 export * from "./dpi";
 export * from "./stages";
 export * from "./sensor";

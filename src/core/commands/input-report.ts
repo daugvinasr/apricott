@@ -1,5 +1,5 @@
 import type { Frame } from "../bytes";
-import { type PollingRate, pollingIndexToHz } from "./polling";
+import { type PollingRate, pollingIndexToHz } from "./polling-rate";
 
 export interface InputReport {
   charging: boolean;
