@@ -2,6 +2,7 @@ import { expect, it } from "vite-plus/test";
 import { fakeBus } from "./fake-bus";
 import { MAX_DEBOUNCE_MS, MIN_DEBOUNCE_MS, readDebounce, writeDebounce } from "../core/commands/debounce";
 import { readSleepTimer, writeSleepTimer } from "../core/commands/sleep";
+import { TransportError } from "../core/errors";
 import { readRapidFire, writeRapidFire } from "../core/commands/timing";
 
 it("debounce", async () => {
@@ -25,4 +26,9 @@ it("sleep timer LE16", async () => {
   expect(await readSleepTimer(bus)).toBe(900);
   await writeSleepTimer(bus, 900);
   expect(writes).toEqual([{ op: 0x05, args: [3, 0x84, 0x03] }]);
+});
+
+it("rejects unknown sleep timer value", async () => {
+  const { bus } = fakeBus(() => [3, 0x2b, 0x00]);
+  await expect(readSleepTimer(bus)).rejects.toThrow(TransportError);
 });
