@@ -1,5 +1,3 @@
-import { TransportError } from "../errors";
-import { hex, isValueOf } from "../bytes";
 import { type Bus, Op, readSub } from "./shared";
 
 export const SensorSub = {
@@ -30,35 +28,3 @@ export const writeAngleSnapping = (t: Bus, on: boolean) => writeFlag(t, SensorSu
 
 export const readMotionSync = (t: Bus) => readFlag(t, SensorSub.motionSync);
 export const writeMotionSync = (t: Bus, on: boolean) => writeFlag(t, SensorSub.motionSync, on);
-
-export const PerformanceMode = {
-  lowPower: 0,
-  highPerformance: 1,
-  wired: 2,
-} as const;
-
-export type PerformanceMode = (typeof PerformanceMode)[keyof typeof PerformanceMode];
-
-const isPerformanceMode = isValueOf(PerformanceMode);
-
-const HIGH_FPS_BIT = 0x80;
-
-export interface SensorMode {
-  performance: PerformanceMode;
-  highFps: boolean; // only wired PAW3950
-}
-
-export async function readSensorMode(t: Bus): Promise<SensorMode> {
-  const v = await readSensorOption(t, SensorSub.sensorMode);
-  const performance = v & 0x7f;
-
-  if (!isPerformanceMode(performance)) {
-    throw new TransportError(`Unknown sensor mode ${hex(v)}`);
-  }
-
-  return { performance, highFps: (v & HIGH_FPS_BIT) !== 0 };
-}
-
-export async function writeSensorMode(t: Bus, sm: SensorMode): Promise<void> {
-  return writeSensorOption(t, SensorSub.sensorMode, sm.performance | (sm.highFps ? HIGH_FPS_BIT : 0));
-}

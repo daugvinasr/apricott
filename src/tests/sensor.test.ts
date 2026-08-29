@@ -3,13 +3,8 @@ import { Sensor } from "../core/commands/identity";
 import { TransportError } from "../core/errors";
 import { fakeBus } from "./fake-bus";
 import { LiftOff, readLiftOff, supportedLiftOffs } from "../core/commands/lift-off";
-import {
-  readAngleSnapping,
-  readSensorMode,
-  PerformanceMode,
-  writeMotionSync,
-  writeSensorMode,
-} from "../core/commands/sensor";
+import { PerformanceMode, readSensorMode, writeSensorMode } from "../core/commands/performance-mode";
+import { readAngleSnapping, writeMotionSync } from "../core/commands/sensor";
 
 it("validates sub-command echo", async () => {
   const { bus } = fakeBus(() => [2, 1]);
