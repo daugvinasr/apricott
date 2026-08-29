@@ -24,7 +24,8 @@ export const readRippleControl = (t: Bus) => readFlag(t, SensorSub.ripple);
 export const writeRippleControl = (t: Bus, on: boolean) => writeFlag(t, SensorSub.ripple, on);
 
 export const readAngleSnapping = (t: Bus) => readFlag(t, SensorSub.angleSnapping);
-export const writeAngleSnapping = (t: Bus, on: boolean) => writeFlag(t, SensorSub.angleSnapping, on);
+export const writeAngleSnapping = (t: Bus, on: boolean) =>
+  writeFlag(t, SensorSub.angleSnapping, on);
 
 export const readMotionSync = (t: Bus) => readFlag(t, SensorSub.motionSync);
 export const writeMotionSync = (t: Bus, on: boolean) => writeFlag(t, SensorSub.motionSync, on);

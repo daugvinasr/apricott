@@ -32,9 +32,7 @@ export default function DebouncePanel() {
         >
           −
         </button>
-        <span {...stylex.props(styles.amount)}>
-          {shown === undefined ? "" : `${shown} ms`}
-        </span>
+        <span {...stylex.props(styles.amount)}>{shown === undefined ? "" : `${shown} ms`}</span>
         <button
           aria-label="Increase debounce"
           disabled={busy || shown === undefined || shown >= MAX_DEBOUNCE_MS}

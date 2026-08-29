@@ -35,9 +35,7 @@ export default function SleepTimerPanel() {
         >
           −
         </button>
-        <span {...stylex.props(styles.amount)}>
-          {shown === undefined ? "" : `${shown} s`}
-        </span>
+        <span {...stylex.props(styles.amount)}>{shown === undefined ? "" : `${shown} s`}</span>
         <button
           aria-label="Increase sleep timer"
           disabled={busy || next === undefined}

@@ -32,5 +32,9 @@ export async function readSensorMode(t: Bus): Promise<SensorMode> {
 }
 
 export async function writeSensorMode(t: Bus, sm: SensorMode): Promise<void> {
-  return writeSensorOption(t, SensorSub.sensorMode, sm.performance | (sm.highFps ? HIGH_FPS_BIT : 0));
+  return writeSensorOption(
+    t,
+    SensorSub.sensorMode,
+    sm.performance | (sm.highFps ? HIGH_FPS_BIT : 0),
+  );
 }
