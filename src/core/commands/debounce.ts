@@ -1,7 +1,9 @@
 import { assertRange, type Bus, Op, readSub } from "./shared";
 import { TimingSub } from "./timing";
 
-export const MAX_DEBOUNCE_MS = 30; // default 8
+export const MIN_DEBOUNCE_MS = 0;
+export const MAX_DEBOUNCE_MS = 30;
+export const DEFAULT_DEBOUNCE_MS = 8;
 
 export async function readDebounce(t: Bus): Promise<number> {
   const r = await readSub(t, Op.timingOptions, TimingSub.debounce);
@@ -9,6 +11,6 @@ export async function readDebounce(t: Bus): Promise<number> {
 }
 
 export async function writeDebounce(t: Bus, ms: number): Promise<void> {
-  assertRange("debounce", ms, 0, MAX_DEBOUNCE_MS);
+  assertRange("debounce", ms, MIN_DEBOUNCE_MS, MAX_DEBOUNCE_MS);
   return t.write(Op.timingOptions, [TimingSub.debounce, ms]);
 }

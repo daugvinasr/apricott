@@ -1,6 +1,6 @@
 import { expect, it } from "vite-plus/test";
 import { fakeBus } from "./fake-bus";
-import { readDebounce, writeDebounce } from "../core/commands/debounce";
+import { MAX_DEBOUNCE_MS, MIN_DEBOUNCE_MS, readDebounce, writeDebounce } from "../core/commands/debounce";
 import { readSleepTimer, writeSleepTimer } from "../core/commands/sleep";
 import { readRapidFire, writeRapidFire } from "../core/commands/timing";
 
@@ -9,7 +9,8 @@ it("debounce", async () => {
   expect(await readDebounce(bus)).toBe(12);
   await writeDebounce(bus, 30);
   expect(writes).toEqual([{ op: 0x05, args: [1, 30] }]);
-  await expect(writeDebounce(bus, 64)).rejects.toThrow(RangeError);
+  await expect(writeDebounce(bus, MAX_DEBOUNCE_MS + 1)).rejects.toThrow(RangeError);
+  await expect(writeDebounce(bus, MIN_DEBOUNCE_MS - 1)).rejects.toThrow(RangeError);
 });
 
 it("rapid fire with LE16 interval", async () => {
