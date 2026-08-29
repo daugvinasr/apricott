@@ -1,4 +1,4 @@
-import { MAX_STAGES, SENSOR_DPI, type Sensor, snapDpi } from "../core/commands";
+import { MAX_DPI_STAGES, SENSOR_DPI, type Sensor, snapDpi } from "../core/commands";
 import { dpiStageSetting, stagesSetting } from "../device/settings";
 import { useConnectedDevice } from "../device/context";
 import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
@@ -187,7 +187,7 @@ export default function DpiPanel() {
         <span {...stylex.props(styles.amount)}>{cfg?.count ?? ""}</span>
         <button
           aria-label="Add stage"
-          disabled={busy || !cfg || cfg.count >= MAX_STAGES}
+          disabled={busy || !cfg || cfg.count >= MAX_DPI_STAGES}
           onClick={() => cfg && stages.set({ ...cfg, count: cfg.count + 1 })}
         >
           +

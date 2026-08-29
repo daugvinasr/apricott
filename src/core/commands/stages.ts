@@ -1,4 +1,5 @@
-import { assertRange, type Bus, MAX_STAGES, Op } from "./shared";
+import { MAX_DPI_STAGES } from "./dpi";
+import { assertRange, type Bus, Op } from "./shared";
 
 export interface StageConfig {
   count: number;
@@ -19,7 +20,7 @@ export async function readStages(t: Bus): Promise<StageConfig> {
 }
 
 export async function writeStages(t: Bus, cfg: StageConfig): Promise<void> {
-  assertRange("count", cfg.count, 1, MAX_STAGES);
+  assertRange("count", cfg.count, 1, MAX_DPI_STAGES);
   assertRange("active", cfg.active, 0, cfg.count - 1);
   assertRange("dpiEffect", cfg.dpiEffect, 0, 2);
 

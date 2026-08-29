@@ -1,6 +1,8 @@
 import { hex, le16Bytes } from "../bytes";
 import { Sensor } from "./identity";
-import { assertRange, type Bus, MAX_STAGES, Op, readSub } from "./shared";
+import { assertRange, type Bus, Op, readSub } from "./shared";
+
+export const MAX_DPI_STAGES = 6;
 
 export interface DpiRange {
   min: number;
@@ -46,7 +48,7 @@ export async function readDpiStage(
   stage: number,
   axis: DpiAxis,
 ): Promise<DpiStage> {
-  assertRange("stage", stage, 0, MAX_STAGES - 1);
+  assertRange("stage", stage, 0, MAX_DPI_STAGES - 1);
 
   const r = await readSub(t, Op.dpi, stage, [axis]);
 
@@ -60,7 +62,7 @@ export async function writeDpiStage(
   axis: DpiAxis,
   { dpi, reserved }: DpiStage,
 ): Promise<void> {
-  assertRange("stage", stage, 0, MAX_STAGES - 1);
+  assertRange("stage", stage, 0, MAX_DPI_STAGES - 1);
 
   if (snapDpi(sensor, dpi) !== dpi) {
     throw new RangeError(`dpi ${dpi} is out of range or off-step for sensor ${hex(sensor)}`);

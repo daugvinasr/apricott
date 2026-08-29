@@ -1,4 +1,4 @@
-export { type Bus, MAX_STAGES, Op } from "./shared";
+export { type Bus, Op } from "./shared";
 export * from "./polling-rate";
 export * from "./dpi";
 export * from "./stages";
