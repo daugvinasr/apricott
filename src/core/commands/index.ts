@@ -3,6 +3,7 @@ export * from "./polling-rate";
 export * from "./dpi";
 export * from "./stages";
 export * from "./sensor";
+export * from "./liftoff";
 export * from "./timing";
 export * from "./buttons";
 export * from "./identity";

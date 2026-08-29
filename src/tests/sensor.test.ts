@@ -2,12 +2,10 @@ import { expect, it } from "vite-plus/test";
 import { Sensor } from "../core/commands/identity";
 import { TransportError } from "../core/errors";
 import { fakeBus } from "./fake-bus";
+import { LiftOff, readLiftOff, supportedLiftOffs } from "../core/commands/liftoff";
 import {
-  LiftOff,
   readAngleSnapping,
-  readLiftOff,
   readSensorMode,
-  supportedLiftOffs,
   PerformanceMode,
   writeMotionSync,
   writeSensorMode,

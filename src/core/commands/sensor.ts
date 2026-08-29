@@ -1,9 +1,8 @@
 import { TransportError } from "../errors";
 import { hex, isValueOf } from "../bytes";
-import { Sensor } from "./identity";
 import { type Bus, Op, readSub } from "./shared";
 
-const Sub = {
+export const SensorSub = {
   liftOff: 1,
   ripple: 2,
   angleSnapping: 3,
@@ -11,56 +10,26 @@ const Sub = {
   sensorMode: 5,
 } as const;
 
-async function readOption(t: Bus, sub: number): Promise<number> {
+export async function readSensorOption(t: Bus, sub: number): Promise<number> {
   const r = await readSub(t, Op.sensorOptions, sub);
   return r.u8(0);
 }
 
-async function writeOption(t: Bus, sub: number, value: number): Promise<void> {
+export async function writeSensorOption(t: Bus, sub: number, value: number): Promise<void> {
   return t.write(Op.sensorOptions, [sub, value]);
 }
 
-const readFlag = async (t: Bus, sub: number) => (await readOption(t, sub)) === 1;
-const writeFlag = (t: Bus, sub: number, on: boolean) => writeOption(t, sub, on ? 1 : 0);
+const readFlag = async (t: Bus, sub: number) => (await readSensorOption(t, sub)) === 1;
+const writeFlag = (t: Bus, sub: number, on: boolean) => writeSensorOption(t, sub, on ? 1 : 0);
 
-export const LiftOff = {
-  mm1: 0,
-  mm2: 1,
-  mm07: 2, // Only PAW3950
-} as const;
+export const readRippleControl = (t: Bus) => readFlag(t, SensorSub.ripple);
+export const writeRippleControl = (t: Bus, on: boolean) => writeFlag(t, SensorSub.ripple, on);
 
-export type LiftOff = (typeof LiftOff)[keyof typeof LiftOff];
+export const readAngleSnapping = (t: Bus) => readFlag(t, SensorSub.angleSnapping);
+export const writeAngleSnapping = (t: Bus, on: boolean) => writeFlag(t, SensorSub.angleSnapping, on);
 
-const isLiftOff = isValueOf(LiftOff);
-
-// 0.7 mm is only available on the PAW3950
-export function supportedLiftOffs(sensor: Sensor): readonly LiftOff[] {
-  const all = Object.values(LiftOff);
-  return sensor === Sensor.PAW3950 ? all : all.filter((v) => v !== LiftOff.mm07);
-}
-
-export async function readLiftOff(t: Bus): Promise<LiftOff> {
-  const v = await readOption(t, Sub.liftOff);
-
-  if (!isLiftOff(v)) {
-    throw new TransportError(`Unknown lift-off value ${v}`);
-  }
-
-  return v;
-}
-
-export async function writeLiftOff(t: Bus, value: LiftOff): Promise<void> {
-  return writeOption(t, Sub.liftOff, value);
-}
-
-export const readRippleControl = (t: Bus) => readFlag(t, Sub.ripple);
-export const writeRippleControl = (t: Bus, on: boolean) => writeFlag(t, Sub.ripple, on);
-
-export const readAngleSnapping = (t: Bus) => readFlag(t, Sub.angleSnapping);
-export const writeAngleSnapping = (t: Bus, on: boolean) => writeFlag(t, Sub.angleSnapping, on);
-
-export const readMotionSync = (t: Bus) => readFlag(t, Sub.motionSync);
-export const writeMotionSync = (t: Bus, on: boolean) => writeFlag(t, Sub.motionSync, on);
+export const readMotionSync = (t: Bus) => readFlag(t, SensorSub.motionSync);
+export const writeMotionSync = (t: Bus, on: boolean) => writeFlag(t, SensorSub.motionSync, on);
 
 export const PerformanceMode = {
   lowPower: 0,
@@ -80,7 +49,7 @@ export interface SensorMode {
 }
 
 export async function readSensorMode(t: Bus): Promise<SensorMode> {
-  const v = await readOption(t, Sub.sensorMode);
+  const v = await readSensorOption(t, SensorSub.sensorMode);
   const performance = v & 0x7f;
 
   if (!isPerformanceMode(performance)) {
@@ -91,5 +60,5 @@ export async function readSensorMode(t: Bus): Promise<SensorMode> {
 }
 
 export async function writeSensorMode(t: Bus, sm: SensorMode): Promise<void> {
-  return writeOption(t, Sub.sensorMode, sm.performance | (sm.highFps ? HIGH_FPS_BIT : 0));
+  return writeSensorOption(t, SensorSub.sensorMode, sm.performance | (sm.highFps ? HIGH_FPS_BIT : 0));
 }
