@@ -29,6 +29,7 @@ import {
   type PollingRate,
   type SleepTimer,
 } from "../core/commands";
+import type { Bus } from "../core/commands";
 import type { DeviceSetting } from "./useDeviceSetting";
 
 export const liftOffSetting: DeviceSetting<LiftOff> = {
@@ -94,26 +95,59 @@ export interface DpiStagePair {
 
 const STAGE_INDICES = Array.from({ length: MAX_DPI_STAGES }, (_, i) => i);
 
-// All hardware stages as one value; the device only exposes per-axis reads/writes, so a commit
-// rewrites every stage. Keeps X/Y sync and cross-stage derivations atomic in the cache.
+async function readPair(bus: Bus, sensor: Sensor, stage: number): Promise<DpiStagePair> {
+  return {
+    x: await readDpiStage(bus, sensor, stage, DpiAxis.x),
+    y: await readDpiStage(bus, sensor, stage, DpiAxis.y),
+  };
+}
+
 export function dpiStagesSetting(sensor: Sensor): DeviceSetting<DpiStagePair[]> {
+  const writeAxis = (bus: Bus, stage: number, axis: DpiAxis, value: DpiStage) =>
+    writeDpiStage(bus, sensor, stage, axis, value);
+
   return {
     key: "dpi",
     read: async (bus) => {
       const pairs: DpiStagePair[] = [];
+
       for (const stage of STAGE_INDICES) {
-        pairs.push({
-          x: await readDpiStage(bus, sensor, stage, DpiAxis.x),
-          y: await readDpiStage(bus, sensor, stage, DpiAxis.y),
-        });
+        pairs.push(await readPair(bus, sensor, stage));
       }
+
       return pairs;
     },
     write: async (bus, pairs) => {
       for (const [stage, { x, y }] of pairs.entries()) {
-        await writeDpiStage(bus, sensor, stage, DpiAxis.x, x);
-        await writeDpiStage(bus, sensor, stage, DpiAxis.y, y);
+        await writeAxis(bus, stage, DpiAxis.x, x);
+        await writeAxis(bus, stage, DpiAxis.y, y);
       }
+    },
+    update: async (bus, next, prev) => {
+      const result = [...prev];
+      for (const [stage, pair] of next.entries()) {
+        const before = prev[stage];
+
+        if (!before) {
+          continue;
+        }
+
+        let after = before;
+
+        for (const [axis, key] of [
+          [DpiAxis.x, "x"],
+          [DpiAxis.y, "y"],
+        ] as const) {
+          if (pair[key].dpi === before[key].dpi) {
+            continue;
+          }
+
+          await writeAxis(bus, stage, axis, pair[key]);
+          after = { ...after, [key]: await readDpiStage(bus, sensor, stage, axis) };
+        }
+        result[stage] = after;
+      }
+      return result;
     },
     equals: (a, b) =>
       a.length === b.length &&

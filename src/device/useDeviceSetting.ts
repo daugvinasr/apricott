@@ -6,7 +6,11 @@ export interface DeviceSetting<T> {
   key: string;
   read(bus: Bus): Promise<T>;
   write(bus: Bus, value: T): Promise<void>;
-  equals?: (a: T, b: T) => boolean; // property, not method: avoids the unbound-method lint at the call site
+  // Optional incremental commit: write only what differs from `prev` and return the read-back
+  // value. Falls back to full write + read when absent or when nothing is cached yet.
+  update?: (bus: Bus, next: T, prev: T) => Promise<T>;
+  // Properties, not methods: avoids the unbound-method lint at the call site.
+  equals?: (a: T, b: T) => boolean;
 }
 
 // Should never happen
@@ -27,8 +31,14 @@ export function useDeviceSetting<T>(setting: DeviceSetting<T>) {
 
   const mutation = useMutation({
     mutationFn: async (next: T) => {
-      await setting.write(transport, next);
-      const value = await setting.read(transport);
+      const prev = queries.getQueryData<T>(queryKey);
+      let value: T;
+      if (setting.update && prev !== undefined) {
+        value = await setting.update(transport, next, prev);
+      } else {
+        await setting.write(transport, next);
+        value = await setting.read(transport);
+      }
 
       queries.setQueryData(queryKey, value);
 
