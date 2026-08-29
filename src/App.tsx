@@ -2,6 +2,8 @@ import * as stylex from "@stylexjs/stylex";
 import { MODEL_NAMES, Sensor } from "./core/commands";
 import { Connected, DeviceProvider } from "./device/connection";
 import { useConnection } from "./device/context";
+import DpiPanel from "./components/DpiPanel";
+import InputReportPanel from "./components/InputReportPanel";
 import PollingRatePanel from "./components/PollingRatePanel";
 import LiftOffPanel from "./components/LiftOffPanel";
 import SleepTimerPanel from "./components/SleepTimerPanel";
@@ -44,6 +46,8 @@ function DevicePanel() {
         </pre>
       )}
       <Connected>
+        <InputReportPanel />
+        <DpiPanel />
         <PollingRatePanel />
         <LiftOffPanel />
         <SleepTimerPanel />

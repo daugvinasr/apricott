@@ -17,7 +17,7 @@ export const Op = {
   identity: 0x0f,
 } as const;
 
-export const MAX_STAGES = 6;
+export const MAX_DPI_STAGES = 6;
 
 export function assertRange(name: string, value: number, min: number, max: number): void {
   if (!Number.isInteger(value) || value < min || value > max) {
