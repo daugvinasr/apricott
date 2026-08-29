@@ -1,6 +1,12 @@
 import { useIsFetching, useIsMutating, useMutation, useQuery } from "@tanstack/react-query";
 import { useConnectedDevice } from "./context";
-import type { DeviceSetting } from "./settings";
+import type { Bus } from "../core/commands";
+
+export interface DeviceSetting<T> {
+  key: string;
+  read(bus: Bus): Promise<T>;
+  write(bus: Bus, value: T): Promise<void>;
+}
 
 // Should never happen
 export class ReadbackMismatchError<T> extends Error {
