@@ -1,4 +1,5 @@
-import { LiftOff, readLiftOff, supportedLiftOffs, writeLiftOff } from "../core/commands";
+import { LiftOff, supportedLiftOffs } from "../core/commands";
+import { liftOffSetting } from "../device/settings";
 import { useConnectedDevice } from "../device/context";
 import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
@@ -17,11 +18,7 @@ const LIFT_OFF_LABELS = {
 
 export default function LiftOffPanel() {
   const { identity } = useConnectedDevice();
-  const liftOff = useDeviceSetting({
-    key: "liftOff",
-    read: readLiftOff,
-    write: writeLiftOff,
-  });
+  const liftOff = useDeviceSetting(liftOffSetting);
   const busy = useDeviceBusy();
 
   return (

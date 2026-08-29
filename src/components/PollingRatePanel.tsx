@@ -1,4 +1,5 @@
-import { readPollingRate, supportedPollingRates, writePollingRate } from "../core/commands";
+import { supportedPollingRates } from "../core/commands";
+import { pollingRateSetting } from "../device/settings";
 import { useConnectedDevice } from "../device/context";
 import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
@@ -11,11 +12,7 @@ const colorStyles = stylex.create({
 
 export default function PollingRatePanel() {
   const { identity } = useConnectedDevice();
-  const polling = useDeviceSetting({
-    key: "pollingRate",
-    read: readPollingRate,
-    write: writePollingRate,
-  });
+  const polling = useDeviceSetting(pollingRateSetting);
   const busy = useDeviceBusy();
   const rates = [...supportedPollingRates(identity.link)].sort((a, b) => a - b);
 
