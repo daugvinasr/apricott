@@ -18,38 +18,85 @@ const styles = stylex.create({
   slider: {
     flex: 1,
   },
+  axes: {
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    gap: 4,
+  },
   active: {
     backgroundColor: "orange",
   },
 });
 
+function DpiSlider({
+  label,
+  sensor,
+  value,
+  disabled,
+  onCommit,
+}: {
+  label: string;
+  sensor: Sensor;
+  value: number | undefined;
+  disabled: boolean;
+  onCommit: (dpi: number) => void;
+}) {
+  const { min, max, step } = SENSOR_DPI[sensor];
+  const [draft, setDraft] = useState<number>();
+  const shown = draft ?? value;
+
+  const commit = () => {
+    if (draft === undefined) return;
+    setDraft(undefined);
+    if (draft !== value) onCommit(draft);
+  };
+
+  return (
+    <>
+      <input
+        type="range"
+        aria-label={label}
+        min={min}
+        max={max}
+        step={step}
+        value={shown ?? min}
+        disabled={disabled || value === undefined}
+        onChange={(e) => setDraft(snapDpi(sensor, Number(e.target.value)))}
+        onPointerUp={commit}
+        onKeyUp={commit}
+        onBlur={commit}
+        {...stylex.props(styles.slider)}
+      />
+      <span {...stylex.props(styles.amount)}>{shown ?? ""}</span>
+    </>
+  );
+}
+
 function DpiStageRow({
   sensor,
   stage,
   isActive,
+  separateXY,
   onActivate,
 }: {
   sensor: Sensor;
   stage: number;
   isActive: boolean;
+  separateXY: boolean;
   onActivate: () => void;
 }) {
   const setting = dpiStageSetting(sensor, stage);
   const pair = useDeviceSetting(setting);
   const busy = useDeviceBusy();
-  const { min, max, step } = SENSOR_DPI[sensor];
 
   const current = pair.pending ?? pair.value;
-  const dpi = current?.x.dpi;
-  const [draft, setDraft] = useState<number>();
-  const shown = draft ?? dpi;
+  const name = `Stage ${stage + 1}`;
 
-  const commit = () => {
-    if (draft === undefined || !current) return;
-    setDraft(undefined);
-    if (draft === dpi) return;
-    pair.set({ x: { ...current.x, dpi: draft }, y: { ...current.y, dpi: draft } });
-  };
+  const setBoth = (dpi: number) =>
+    current && pair.set({ x: { ...current.x, dpi }, y: { ...current.y, dpi } });
+  const setX = (dpi: number) => current && pair.set({ ...current, x: { ...current.x, dpi } });
+  const setY = (dpi: number) => current && pair.set({ ...current, y: { ...current.y, dpi } });
 
   return (
     <div>
@@ -57,28 +104,45 @@ function DpiStageRow({
         <button
           role="radio"
           aria-checked={isActive}
-          aria-label={`Stage ${stage + 1}`}
+          aria-label={name}
           disabled={busy}
           onClick={onActivate}
           {...stylex.props(isActive && styles.active)}
         >
           {stage + 1}
         </button>
-        <input
-          type="range"
-          aria-label={`Stage ${stage + 1} DPI`}
-          min={min}
-          max={max}
-          step={step}
-          value={shown ?? min}
-          disabled={busy || dpi === undefined}
-          onChange={(e) => setDraft(snapDpi(sensor, Number(e.target.value)))}
-          onPointerUp={commit}
-          onKeyUp={commit}
-          onBlur={commit}
-          {...stylex.props(styles.slider)}
-        />
-        <span {...stylex.props(styles.amount)}>{shown ?? ""}</span>
+        {separateXY ? (
+          <div {...stylex.props(styles.axes)}>
+            <div {...stylex.props(styles.row)}>
+              <span>X</span>
+              <DpiSlider
+                label={`${name} X DPI`}
+                sensor={sensor}
+                value={current?.x.dpi}
+                disabled={busy}
+                onCommit={setX}
+              />
+            </div>
+            <div {...stylex.props(styles.row)}>
+              <span>Y</span>
+              <DpiSlider
+                label={`${name} Y DPI`}
+                sensor={sensor}
+                value={current?.y.dpi}
+                disabled={busy}
+                onCommit={setY}
+              />
+            </div>
+          </div>
+        ) : (
+          <DpiSlider
+            label={`${name} DPI`}
+            sensor={sensor}
+            value={current?.x.dpi}
+            disabled={busy}
+            onCommit={setBoth}
+          />
+        )}
       </div>
       {pair.error && <p role="alert">{pair.error.message}</p>}
     </div>
@@ -91,10 +155,19 @@ export default function DpiPanel() {
   const busy = useDeviceBusy();
 
   const cfg = stages.pending ?? stages.value;
+  const [separateXY, setSeparateXY] = useState(false);
 
   return (
     <div>
       <p>DPI</p>
+      <label>
+        <input
+          type="checkbox"
+          checked={separateXY}
+          onChange={(e) => setSeparateXY(e.target.checked)}
+        />
+        Adjust X/Y separately
+      </label>
       <div {...stylex.props(styles.row)}>
         <span>Stages</span>
         <button
@@ -128,6 +201,7 @@ export default function DpiPanel() {
               sensor={identity.sensor}
               stage={i}
               isActive={i === cfg.active}
+              separateXY={separateXY}
               onActivate={() => stages.set({ ...cfg, active: i })}
             />
           ))}
