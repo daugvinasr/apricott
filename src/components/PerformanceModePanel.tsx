@@ -1,5 +1,5 @@
-import { PerformanceMode, Sensor } from "../core/commands";
-import { sensorModeSetting } from "../device/settings";
+import { isHighRate, PerformanceMode, Sensor } from "../core/commands";
+import { pollingRateSetting, performanceModeSetting } from "../device/settings";
 import { useConnectedDevice } from "../device/context";
 import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
@@ -16,14 +16,18 @@ const PERFORMANCE_LABELS = {
   [PerformanceMode.wired]: "Wired",
 } satisfies Record<PerformanceMode, string>;
 
-export default function SensorModePanel() {
+export default function PerformanceModePanel() {
   const { identity } = useConnectedDevice();
-  const mode = useDeviceSetting(sensorModeSetting);
+  const mode = useDeviceSetting(performanceModeSetting);
+  const polling = useDeviceSetting(pollingRateSetting);
   const busy = useDeviceBusy();
 
+  // Over 1k the device is is always in wired performance mode
+  const highRate = polling.value !== undefined && isHighRate(polling.value);
   const current = mode.value;
+  const shownPerformance = highRate ? PerformanceMode.wired : current?.performance;
   const canHighFps =
-    identity.sensor === Sensor.PAW3950 && current?.performance === PerformanceMode.wired;
+    identity.sensor === Sensor.PAW3950 && shownPerformance === PerformanceMode.wired;
 
   return (
     <div>
@@ -33,13 +37,13 @@ export default function SensorModePanel() {
           <button
             key={v}
             role="radio"
-            aria-checked={v === current?.performance}
-            disabled={busy || current === undefined}
+            aria-checked={v === shownPerformance}
+            disabled={busy || highRate || current === undefined}
             onClick={() =>
               current &&
               mode.set({ performance: v, highFps: v === PerformanceMode.wired && current.highFps })
             }
-            {...stylex.props(v === current?.performance && colorStyles.active)}
+            {...stylex.props(v === shownPerformance && colorStyles.active)}
           >
             {PERFORMANCE_LABELS[v]}
           </button>
