@@ -1,8 +1,9 @@
 import { MAX_DPI_STAGES, SENSOR_DPI, type Sensor, snapDpi } from "../core/commands";
-import { dpiStageSetting, stagesSetting } from "../device/settings";
+import { type DpiStagePair, dpiStageSetting, stagesSetting } from "../device/settings";
 import { useConnectedDevice } from "../device/context";
 import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
+import { useMutation, useQueries } from "@tanstack/react-query";
 import { useState } from "react";
 
 const styles = stylex.create({
@@ -150,12 +151,42 @@ function DpiStageRow({
 }
 
 export default function DpiPanel() {
-  const { identity } = useConnectedDevice();
+  const { identity, transport, queries } = useConnectedDevice();
   const stages = useDeviceSetting(stagesSetting);
   const busy = useDeviceBusy();
 
   const cfg = stages.pending ?? stages.value;
-  const [separateXY, setSeparateXY] = useState(false);
+  const count = cfg?.count ?? 0;
+
+  // Subscribe to the per-stage caches (rows do the fetching) to derive whether any X != Y.
+  const pairs = useQueries({
+    queries: Array.from({ length: count }, (_, i) => {
+      const setting = dpiStageSetting(identity.sensor, i);
+      return {
+        queryKey: [setting.key],
+        queryFn: (): Promise<DpiStagePair> => setting.read(transport),
+        enabled: false,
+      };
+    }),
+    combine: (results) => results.map((r) => r.data),
+  });
+  const anyDiffers = pairs.some((p) => p && p.x.dpi !== p.y.dpi);
+
+  const [forceSeparate, setForceSeparate] = useState(false);
+  const separateXY = forceSeparate || anyDiffers;
+
+  // Turning the toggle off re-syncs Y to X on every stage that differs.
+  const syncXY = useMutation({
+    mutationFn: async () => {
+      for (const [i, p] of pairs.entries()) {
+        if (!p || p.x.dpi === p.y.dpi) continue;
+        const setting = dpiStageSetting(identity.sensor, i);
+        const next = { ...p, y: { ...p.y, dpi: p.x.dpi } };
+        await setting.write(transport, next);
+        queries.setQueryData([setting.key], await setting.read(transport));
+      }
+    },
+  });
 
   return (
     <div>
@@ -164,7 +195,11 @@ export default function DpiPanel() {
         <input
           type="checkbox"
           checked={separateXY}
-          onChange={(e) => setSeparateXY(e.target.checked)}
+          disabled={busy}
+          onChange={(e) => {
+            setForceSeparate(e.target.checked);
+            if (!e.target.checked && anyDiffers) syncXY.mutate();
+          }}
         />
         Adjust X/Y separately
       </label>
@@ -207,6 +242,7 @@ export default function DpiPanel() {
           ))}
       </div>
       {stages.error && <p role="alert">{stages.error.message}</p>}
+      {syncXY.error && <p role="alert">{syncXY.error.message}</p>}
     </div>
   );
 }
