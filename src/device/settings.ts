@@ -1,4 +1,7 @@
 import {
+  readSensorMode,
+  writeSensorMode,
+  type SensorMode,
   readDebounce,
   writeDebounce,
   readLiftOff,
@@ -35,4 +38,11 @@ export const debounceSetting: DeviceSetting<number> = {
   key: "debounce",
   read: readDebounce,
   write: writeDebounce,
+};
+
+export const sensorModeSetting: DeviceSetting<SensorMode> = {
+  key: "sensorMode",
+  read: readSensorMode,
+  write: writeSensorMode,
+  equals: (a, b) => a.performance === b.performance && a.highFps === b.highFps,
 };

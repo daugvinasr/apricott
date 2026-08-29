@@ -6,6 +6,7 @@ export interface DeviceSetting<T> {
   key: string;
   read(bus: Bus): Promise<T>;
   write(bus: Bus, value: T): Promise<void>;
+  equals?(a: T, b: T): boolean;
 }
 
 // Should never happen
@@ -31,7 +32,8 @@ export function useDeviceSetting<T>(setting: DeviceSetting<T>) {
 
       queries.setQueryData(queryKey, value);
 
-      if (!Object.is(value, next)) {
+      const equals = setting.equals ?? Object.is;
+      if (!equals(value, next)) {
         throw new ReadbackMismatchError(setting.key, next, value);
       }
     },
