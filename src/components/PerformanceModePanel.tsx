@@ -1,4 +1,4 @@
-import { isHighRate, PerformanceMode, Sensor } from "../core/commands";
+import { isHighPollingRate, PerformanceMode, Sensor } from "../core/commands";
 import { pollingRateSetting, performanceModeSetting } from "../device/settings";
 import { useConnectedDevice } from "../device/context";
 import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
@@ -23,7 +23,7 @@ export default function PerformanceModePanel() {
   const busy = useDeviceBusy();
 
   // Over 1k the device is is always in wired performance mode
-  const highRate = polling.value !== undefined && isHighRate(polling.value);
+  const highRate = polling.value !== undefined && isHighPollingRate(polling.value);
   const current = mode.value;
   const shownPerformance = highRate ? PerformanceMode.wired : current?.performance;
   const canHighFps =
