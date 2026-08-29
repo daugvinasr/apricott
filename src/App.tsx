@@ -1,53 +1,92 @@
 import * as stylex from "@stylexjs/stylex";
-import { useState } from "react";
 import {
-  type Identity,
-  isAwake,
+  LiftOff,
   MODEL_NAMES,
-  readAngleSnapping,
-  readIdentity,
   Sensor,
-  writeAngleSnapping,
+  supportedLiftOffs,
+  supportedPollingRates,
 } from "./core/commands";
-import { DEVICE_FILTERS, Transport } from "./core/transport";
+import { Connected, DeviceProvider } from "./device/connection";
+import { useConnectedDevice, useConnection } from "./device/context";
+import * as settings from "./device/settings";
+import { useDeviceBusy, useDeviceSetting } from "./device/useDeviceSetting";
 
 const colorStyles = stylex.create({
   button: {
     backgroundColor: "red",
   },
+  active: {
+    backgroundColor: "orange",
+  },
 });
 
 const SENSOR_LABELS = Object.fromEntries(Object.entries(Sensor).map(([name, id]) => [id, name]));
 
-function App() {
-  const [transport, setTransport] = useState<Transport | null>(null);
-  const [angleSnapping, setAngleSnapping] = useState<boolean | null>(null);
-  const [identity, setIdentity] = useState<Identity | null>(null);
-  const [awake, setAwake] = useState<boolean | null>(null);
+function PollingRatePanel() {
+  const { identity } = useConnectedDevice();
+  const polling = useDeviceSetting(settings.pollingRate);
+  const busy = useDeviceBusy();
+  const rates = [...supportedPollingRates(identity.link)].sort((a, b) => a - b);
 
-  async function refreshAngleSnapping(t: Transport) {
-    setAngleSnapping(await readAngleSnapping(t));
-  }
+  return (
+    <div>
+      <p>Polling rate{busy ? " (busy)" : ""}</p>
+      <div role="radiogroup">
+        {rates.map((hz) => (
+          <button
+            key={hz}
+            role="radio"
+            aria-checked={hz === polling.value}
+            disabled={busy}
+            onClick={() => polling.set(hz)}
+            {...stylex.props(hz === polling.value && colorStyles.active)}
+          >
+            {hz} Hz{hz === polling.pending ? " …" : ""}
+          </button>
+        ))}
+      </div>
+      {polling.error && <p role="alert">{polling.error.message}</p>}
+    </div>
+  );
+}
 
-  async function connect() {
-    const devices = await navigator.hid.requestDevice({ filters: DEVICE_FILTERS });
-    const t = await Transport.open(devices);
-    setTransport(t);
+const LIFT_OFF_LABELS = {
+  [LiftOff.mm07]: "0.7 mm",
+  [LiftOff.mm1]: "1 mm",
+  [LiftOff.mm2]: "2 mm",
+} satisfies Record<LiftOff, string>;
 
-    const id = await readIdentity(t);
-    setIdentity(id);
-    setAwake(id.link.kind === "wireless" ? await isAwake(t) : true);
+function LiftOffPanel() {
+  const { identity } = useConnectedDevice();
+  const liftOff = useDeviceSetting(settings.liftOff);
+  const busy = useDeviceBusy();
 
-    await refreshAngleSnapping(t);
-  }
+  return (
+    <div>
+      <p>Lift-off distance</p>
+      <div role="radiogroup">
+        {supportedLiftOffs(identity.sensor).map((v) => (
+          <button
+            key={v}
+            role="radio"
+            aria-checked={v === liftOff.value}
+            disabled={busy}
+            onClick={() => liftOff.set(v)}
+            {...stylex.props(v === liftOff.value && colorStyles.active)}
+          >
+            {LIFT_OFF_LABELS[v]}
+            {v === liftOff.pending ? " …" : ""}
+          </button>
+        ))}
+      </div>
+      {liftOff.error && <p role="alert">{liftOff.error.message}</p>}
+    </div>
+  );
+}
 
-  async function toggleAngleSnapping() {
-    if (!transport || angleSnapping === null) {
-      return;
-    }
-    await writeAngleSnapping(transport, !angleSnapping);
-    await refreshAngleSnapping(transport);
-  }
+function DevicePanel() {
+  const { device, connect } = useConnection();
+  const identity = device?.identity;
 
   return (
     <div>
@@ -62,20 +101,25 @@ function App() {
               name:
                 MODEL_NAMES[identity.model] + (identity.sensor === Sensor.PAW3950 ? " Pro" : ""),
               sensor: `${SENSOR_LABELS[identity.sensor]} (0x${identity.sensor.toString(16)})`,
-              awake,
             },
             null,
             2,
           )}
         </pre>
       )}
-      {angleSnapping !== null && (
-        <div>
-          <p>Angle snapping: {angleSnapping ? "enabled" : "disabled"}</p>
-          <button onClick={() => toggleAngleSnapping()}>Turn {angleSnapping ? "off" : "on"}</button>
-        </div>
-      )}
+      <Connected>
+        <PollingRatePanel />
+        <LiftOffPanel />
+      </Connected>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <DeviceProvider>
+      <DevicePanel />
+    </DeviceProvider>
   );
 }
 

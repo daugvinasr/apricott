@@ -1,5 +1,6 @@
 import { TransportError } from "../errors";
 import { hex, isValueOf } from "../bytes";
+import { Sensor } from "./identity";
 import { type Bus, Op, readSub } from "./shared";
 
 const Sub = {
@@ -31,6 +32,12 @@ export const LiftOff = {
 export type LiftOff = (typeof LiftOff)[keyof typeof LiftOff];
 
 const isLiftOff = isValueOf(LiftOff);
+
+// 0.7 mm is only available on the PAW3950
+export function supportedLiftOffs(sensor: Sensor): readonly LiftOff[] {
+  const all = Object.values(LiftOff);
+  return sensor === Sensor.PAW3950 ? all : all.filter((v) => v !== LiftOff.mm07);
+}
 
 export async function readLiftOff(t: Bus): Promise<LiftOff> {
   const v = await readOption(t, Sub.liftOff);

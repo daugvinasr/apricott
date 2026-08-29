@@ -107,6 +107,14 @@ export class Transport implements Bus {
     return payload;
   }
 
+  async close(): Promise<void> {
+    this.device.oninputreport = null;
+    this.inputListener = null;
+    if (this.device.opened) {
+      await this.device.close();
+    }
+  }
+
   onInputReport(listener: ((data: Uint8Array) => void) | null): void {
     this.inputListener = listener;
   }
