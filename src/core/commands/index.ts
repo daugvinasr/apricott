@@ -5,6 +5,8 @@ export * from "./stages";
 export * from "./sensor";
 export * from "./lift-off";
 export * from "./timing";
+export * from "./debounce";
+export * from "./sleep";
 export * from "./buttons";
 export * from "./identity";
 export * from "./input-report";

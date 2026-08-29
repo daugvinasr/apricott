@@ -1,13 +1,8 @@
 import { expect, it } from "vite-plus/test";
 import { fakeBus } from "./fake-bus";
-import {
-  readDebounce,
-  readRapidFire,
-  readSleepTimer,
-  writeDebounce,
-  writeRapidFire,
-  writeSleepTimer,
-} from "../core/commands/timing";
+import { readDebounce, writeDebounce } from "../core/commands/debounce";
+import { readSleepTimer, writeSleepTimer } from "../core/commands/sleep";
+import { readRapidFire, writeRapidFire } from "../core/commands/timing";
 
 it("debounce", async () => {
   const { bus, writes } = fakeBus(() => [1, 12]);
