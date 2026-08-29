@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test";
 import { fakeBus } from "./fake-bus";
 import {
-  isHighRate,
+  isHighPollingRate,
   isPollingRate,
   POLLING_RATES,
   pollingHzToIndex,
@@ -38,9 +38,9 @@ describe("polling codec", () => {
   });
 
   it("flags ≥2000 Hz as high rate", () => {
-    expect(isHighRate(1000)).toBe(false);
-    expect(isHighRate(2000)).toBe(true);
-    expect(isHighRate(8000)).toBe(true);
+    expect(isHighPollingRate(1000)).toBe(false);
+    expect(isHighPollingRate(2000)).toBe(true);
+    expect(isHighPollingRate(8000)).toBe(true);
   });
 });
 

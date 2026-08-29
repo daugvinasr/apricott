@@ -1,10 +1,24 @@
 import {
+  readAngleSnapping,
+  readMotionSync,
+  readRippleControl,
+  writeAngleSnapping,
+  writeMotionSync,
+  writeRippleControl,
+  readSensorMode,
+  writeSensorMode,
+  type SensorMode,
+  readDebounce,
+  writeDebounce,
   readLiftOff,
   readPollingRate,
+  readSleepTimer,
   writeLiftOff,
   writePollingRate,
+  writeSleepTimer,
   type LiftOff,
   type PollingRate,
+  type SleepTimer,
 } from "../core/commands";
 import type { DeviceSetting } from "./useDeviceSetting";
 
@@ -18,4 +32,41 @@ export const pollingRateSetting: DeviceSetting<PollingRate> = {
   key: "pollingRate",
   read: readPollingRate,
   write: writePollingRate,
+};
+
+export const sleepTimerSetting: DeviceSetting<SleepTimer> = {
+  key: "sleepTimer",
+  read: readSleepTimer,
+  write: writeSleepTimer,
+};
+
+export const debounceSetting: DeviceSetting<number> = {
+  key: "debounce",
+  read: readDebounce,
+  write: writeDebounce,
+};
+
+export const performanceModeSetting: DeviceSetting<SensorMode> = {
+  key: "performanceMode",
+  read: readSensorMode,
+  write: writeSensorMode,
+  equals: (a, b) => a.performance === b.performance && a.highFps === b.highFps,
+};
+
+export const angleSnappingSetting: DeviceSetting<boolean> = {
+  key: "angleSnapping",
+  read: readAngleSnapping,
+  write: writeAngleSnapping,
+};
+
+export const motionSyncSetting: DeviceSetting<boolean> = {
+  key: "motionSync",
+  read: readMotionSync,
+  write: writeMotionSync,
+};
+
+export const rippleControlSetting: DeviceSetting<boolean> = {
+  key: "rippleControl",
+  read: readRippleControl,
+  write: writeRippleControl,
 };

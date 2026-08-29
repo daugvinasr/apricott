@@ -4,6 +4,10 @@ import { Connected, DeviceProvider } from "./device/connection";
 import { useConnection } from "./device/context";
 import PollingRatePanel from "./components/PollingRatePanel";
 import LiftOffPanel from "./components/LiftOffPanel";
+import SleepTimerPanel from "./components/SleepTimerPanel";
+import DebouncePanel from "./components/DebouncePanel";
+import PerformanceModePanel from "./components/PerformanceModePanel";
+import SensorTogglesPanel from "./components/SensorTogglesPanel";
 
 const colorStyles = stylex.create({
   button: {
@@ -42,6 +46,10 @@ function DevicePanel() {
       <Connected>
         <PollingRatePanel />
         <LiftOffPanel />
+        <SleepTimerPanel />
+        <DebouncePanel />
+        <PerformanceModePanel />
+        <SensorTogglesPanel />
       </Connected>
     </div>
   );

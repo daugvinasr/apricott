@@ -4,6 +4,7 @@ export * from "./dpi";
 export * from "./stages";
 export * from "./sensor";
 export * from "./lift-off";
+export * from "./performance-mode";
 export * from "./timing";
 export * from "./debounce";
 export * from "./sleep";

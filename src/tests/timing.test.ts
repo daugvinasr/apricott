@@ -1,6 +1,11 @@
 import { expect, it } from "vite-plus/test";
 import { fakeBus } from "./fake-bus";
-import { MAX_DEBOUNCE_MS, MIN_DEBOUNCE_MS, readDebounce, writeDebounce } from "../core/commands/debounce";
+import {
+  MAX_DEBOUNCE_MS,
+  MIN_DEBOUNCE_MS,
+  readDebounce,
+  writeDebounce,
+} from "../core/commands/debounce";
 import { readSleepTimer, writeSleepTimer } from "../core/commands/sleep";
 import { TransportError } from "../core/errors";
 import { readRapidFire, writeRapidFire } from "../core/commands/timing";
