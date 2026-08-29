@@ -23,7 +23,7 @@ export function pollingIndexToHz(index: number): PollingRate {
 
 // Over 1k do not allow to choose performance mode
 // and always show visually "wired" (don't write it)
-export const isHighRate = (hz: number): boolean => hz >= 2000;
+export const isHighRate = (hz: number): boolean => hz > 1000;
 
 // Only the 8K receiver goes above 1000 Hz
 export function supportedPollingRates(link: Link): readonly PollingRate[] {
