@@ -32,7 +32,7 @@ export const unpackLe32 = (code: number): Le32Bytes => [
   (code >>> 24) & 0xff,
 ];
 
-/** Little-endian reader over a fixed-length frame; out-of-range reads throw. */
+/** Little-endian reader over a fixed-length frame. Out-of-range reads throw. */
 export class Frame {
   readonly #bytes: Uint8Array;
 
