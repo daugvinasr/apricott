@@ -21,7 +21,12 @@ const MOUSE_SELECTOR = {
   forward: 0xf4,
 } as const;
 
-const MODIFIERS = ["controlLeft", "shiftLeft", "altLeft", "metaLeft"] as const satisfies KeyName[];
+export const MODIFIERS = [
+  "controlLeft",
+  "shiftLeft",
+  "altLeft",
+  "metaLeft",
+] as const satisfies KeyName[];
 
 const DPI_SUBOP = { plus: 1, minus: 2, cycle: 3 } as const;
 const DPI_SET_SUBOP = 4;

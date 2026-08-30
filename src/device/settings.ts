@@ -28,6 +28,11 @@ import {
   type LiftOff,
   type PollingRate,
   type SleepTimer,
+  type ButtonAction,
+  type ButtonName,
+  encodeAction,
+  readButton,
+  writeButton,
 } from "@/core/commands";
 import type { Bus } from "@/core/commands";
 import type { DeviceSetting } from "./useDeviceSetting";
@@ -152,5 +157,14 @@ export function dpiStagesSetting(sensor: Sensor): DeviceSetting<DpiStagePair[]> 
     equals: (a, b) =>
       a.length === b.length &&
       a.every((p, i) => p.x.dpi === b[i]?.x.dpi && p.y.dpi === b[i]?.y.dpi),
+  };
+}
+
+export function buttonSetting(button: ButtonName): DeviceSetting<ButtonAction> {
+  return {
+    key: `button:${button}`,
+    read: (bus) => readButton(bus, button),
+    write: (bus, action) => writeButton(bus, button, action),
+    equals: (a, b) => encodeAction(a) === encodeAction(b),
   };
 }
