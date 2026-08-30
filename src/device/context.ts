@@ -2,11 +2,13 @@ import type { QueryClient } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import type { Identity } from "@/core/commands";
 import type { Transport } from "@/core/transport";
+import type { InputReportStore } from "./inputReports";
 
 export interface Device {
   transport: Transport;
   identity: Identity;
   queries: QueryClient; // settings cache, scoped to this connection
+  inputReports: InputReportStore;
 }
 
 export interface Connection {

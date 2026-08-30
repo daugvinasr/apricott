@@ -9,7 +9,7 @@ import {
   DeviceContext,
   useConnection,
 } from "./context";
-import { useInputReports } from "./useInputReports";
+import { wireInputReports } from "./inputReports";
 
 function createDeviceQueryClient(): QueryClient {
   return new QueryClient({
@@ -31,7 +31,8 @@ async function openDevice(): Promise<Device> {
 
   try {
     const identity = await readIdentity(transport);
-    return { transport, identity, queries: createDeviceQueryClient() };
+    const queries = createDeviceQueryClient();
+    return { transport, identity, queries, inputReports: wireInputReports(transport, queries) };
   } catch (e) {
     await transport.close();
     throw e;
@@ -78,12 +79,6 @@ export function Connected({ children }: { children: ReactNode }) {
   if (!device) {
     return null;
   }
-
-  return <ConnectedInner device={device}>{children}</ConnectedInner>;
-}
-
-function ConnectedInner({ device, children }: { device: Device; children: ReactNode }) {
-  useInputReports(device);
 
   return (
     <DeviceContext.Provider value={device}>
