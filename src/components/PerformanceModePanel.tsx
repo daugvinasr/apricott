@@ -23,9 +23,9 @@ export default function PerformanceModePanel() {
   const busy = useDeviceBusy();
 
   // Over 1k the device is is always in wired performance mode
-  const highRate = polling.value !== undefined && isHighPollingRate(polling.value);
+  const HighPollingRate = polling.value !== undefined && isHighPollingRate(polling.value);
   const current = mode.value;
-  const shownPerformance = highRate ? PerformanceMode.wired : current?.performance;
+  const shownPerformance = HighPollingRate ? PerformanceMode.wired : current?.performance;
   const supportsFrameRateBoost = identity.sensor === Sensor.PAW3950;
   const canToggleFrameRateBoost =
     supportsFrameRateBoost && current?.performance === PerformanceMode.wired;
@@ -39,7 +39,7 @@ export default function PerformanceModePanel() {
             key={v}
             role="radio"
             aria-checked={v === shownPerformance}
-            disabled={busy || highRate || current === undefined}
+            disabled={busy || HighPollingRate || current === undefined}
             onClick={() =>
               current &&
               mode.set({
