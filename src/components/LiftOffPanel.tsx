@@ -1,7 +1,7 @@
-import { LiftOff, supportedLiftOffs } from "../core/commands";
-import { liftOffSetting } from "../device/settings";
-import { useConnectedDevice } from "../device/context";
-import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
+import { LiftOff, supportedLiftOffs } from "@/core/commands";
+import { liftOffSetting } from "@/device/settings";
+import { useConnectedDevice } from "@/device/context";
+import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
 
 const colorStyles = stylex.create({

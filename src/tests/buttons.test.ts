@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vite-plus/test";
-import { TransportError } from "../core/errors";
+import { TransportError } from "@/core/errors";
 import {
   type ButtonAction,
   decodeAction,
   encodeAction,
   readButton,
   writeButton,
-} from "../core/commands/buttons";
+} from "@/core/commands";
 import { fakeBus } from "./fake-bus";
 
 it("reads LE32 code after matrix check", async () => {

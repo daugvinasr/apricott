@@ -1,6 +1,6 @@
-import { MAX_DEBOUNCE_MS, MIN_DEBOUNCE_MS } from "../core/commands";
-import { debounceSetting } from "../device/settings";
-import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
+import { MAX_DEBOUNCE_MS, MIN_DEBOUNCE_MS } from "@/core/commands";
+import { debounceSetting } from "@/device/settings";
+import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
 
 const styles = stylex.create({

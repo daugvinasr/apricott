@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
-import { Frame, packLe32, unpackLe32 } from "../core/bytes";
-import { TransportError } from "../core/errors";
+import { Frame, packLe32, unpackLe32 } from "@/core/bytes";
+import { TransportError } from "@/core/errors";
 
 describe("Frame", () => {
   const f = new Frame(Uint8Array.from([0x81, 0x34, 0x12, 0xaa, 0xbb, 0xcc]));

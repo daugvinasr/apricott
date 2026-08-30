@@ -1,5 +1,5 @@
-import { angleSnappingSetting, motionSyncSetting, rippleControlSetting } from "../device/settings";
-import { type DeviceSetting, useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
+import { angleSnappingSetting, motionSyncSetting, rippleControlSetting } from "@/device/settings";
+import { type DeviceSetting, useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
 
 function Toggle({ label, setting }: { label: string; setting: DeviceSetting<boolean> }) {
   const flag = useDeviceSetting(setting);

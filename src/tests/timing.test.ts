@@ -5,10 +5,12 @@ import {
   MIN_DEBOUNCE_MS,
   readDebounce,
   writeDebounce,
-} from "../core/commands/debounce";
-import { readSleepTimer, writeSleepTimer } from "../core/commands/sleep";
+  readSleepTimer,
+  writeSleepTimer,
+  readRapidFire,
+  writeRapidFire,
+} from "@/core/commands";
 import { TransportError } from "../core/errors";
-import { readRapidFire, writeRapidFire } from "../core/commands/timing";
 
 it("debounce", async () => {
   const { bus, writes } = fakeBus(() => [1, 12]);

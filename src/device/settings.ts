@@ -28,8 +28,8 @@ import {
   type LiftOff,
   type PollingRate,
   type SleepTimer,
-} from "../core/commands";
-import type { Bus } from "../core/commands";
+} from "@/core/commands";
+import type { Bus } from "@/core/commands";
 import type { DeviceSetting } from "./useDeviceSetting";
 
 export const liftOffSetting: DeviceSetting<LiftOff> = {

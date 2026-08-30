@@ -1,6 +1,6 @@
 import { useIsFetching, useIsMutating, useMutation, useQuery } from "@tanstack/react-query";
 import { useConnectedDevice } from "./context";
-import type { Bus } from "../core/commands";
+import type { Bus } from "@/core/commands";
 
 export interface DeviceSetting<T> {
   key: string;

@@ -1,6 +1,6 @@
 import { expect, it } from "vite-plus/test";
-import { Frame } from "../core/bytes";
-import { parseInputReport } from "../core/commands/input-report";
+import { Frame } from "@/core/bytes";
+import { parseInputReport } from "@/core/commands";
 
 const view = (bytes: number[]) => new Frame(Uint8Array.from(bytes));
 

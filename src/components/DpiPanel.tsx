@@ -1,7 +1,7 @@
-import { MAX_DPI_STAGES, SENSOR_DPI, type Sensor, snapDpi } from "../core/commands";
-import { type DpiStagePair, dpiStagesSetting, stagesSetting } from "../device/settings";
-import { useConnectedDevice } from "../device/context";
-import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
+import { MAX_DPI_STAGES, SENSOR_DPI, type Sensor, snapDpi } from "@/core/commands";
+import { type DpiStagePair, dpiStagesSetting, stagesSetting } from "@/device/settings";
+import { useConnectedDevice } from "@/device/context";
+import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
 import { useState } from "react";
 
