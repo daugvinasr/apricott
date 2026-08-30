@@ -30,7 +30,7 @@ it("splits sensor mode and high-fps bit", async () => {
   const { bus } = fakeBus(() => [5, 0x81]);
   expect(await readSensorMode(bus)).toEqual({
     performance: PerformanceMode.highPerformance,
-    highFps: true,
+    frameRateBoost: true,
   });
 });
 
