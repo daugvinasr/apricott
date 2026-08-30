@@ -23,11 +23,12 @@ export default function PerformanceModePanel() {
   const busy = useDeviceBusy();
 
   // Over 1k the device is is always in wired performance mode
-  const highRate = polling.value !== undefined && isHighPollingRate(polling.value);
+  const highPollingRate = polling.value !== undefined && isHighPollingRate(polling.value);
   const current = mode.value;
-  const shownPerformance = highRate ? PerformanceMode.wired : current?.performance;
-  const canHighFps =
-    identity.sensor === Sensor.PAW3950 && shownPerformance === PerformanceMode.wired;
+  const shownPerformance = highPollingRate ? PerformanceMode.wired : current?.performance;
+  const supportsFrameRateBoost = identity.sensor === Sensor.PAW3950;
+  const canToggleFrameRateBoost =
+    supportsFrameRateBoost && current?.performance === PerformanceMode.wired;
 
   return (
     <div>
@@ -38,10 +39,13 @@ export default function PerformanceModePanel() {
             key={v}
             role="radio"
             aria-checked={v === shownPerformance}
-            disabled={busy || highRate || current === undefined}
+            disabled={busy || highPollingRate || current === undefined}
             onClick={() =>
               current &&
-              mode.set({ performance: v, highFps: v === PerformanceMode.wired && current.highFps })
+              mode.set({
+                performance: v,
+                frameRateBoost: current.frameRateBoost,
+              })
             }
             {...stylex.props(v === shownPerformance && colorStyles.active)}
           >
@@ -49,15 +53,17 @@ export default function PerformanceModePanel() {
           </button>
         ))}
       </div>
-      <label>
-        <input
-          type="checkbox"
-          checked={current?.highFps ?? false}
-          disabled={busy || !canHighFps}
-          onChange={(e) => current && mode.set({ ...current, highFps: e.target.checked })}
-        />
-        High FPS
-      </label>
+      {supportsFrameRateBoost && (
+        <label>
+          <input
+            type="checkbox"
+            checked={current?.frameRateBoost ?? false}
+            disabled={busy || !canToggleFrameRateBoost}
+            onChange={(e) => current && mode.set({ ...current, frameRateBoost: e.target.checked })}
+          />
+          High FPS
+        </label>
+      )}
       {mode.error && <p role="alert">{mode.error.message}</p>}
     </div>
   );

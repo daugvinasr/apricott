@@ -13,11 +13,11 @@ export type PerformanceMode = (typeof PerformanceMode)[keyof typeof PerformanceM
 
 const isPerformanceMode = isValueOf(PerformanceMode);
 
-const HIGH_FPS_BIT = 0x80;
+const FRAME_RATE_BOOST_BIT = 0x80;
 
 export interface SensorMode {
   performance: PerformanceMode;
-  highFps: boolean; // only wired PAW3950
+  frameRateBoost: boolean; // only wired PAW3950
 }
 
 export async function readSensorMode(t: Bus): Promise<SensorMode> {
@@ -28,13 +28,13 @@ export async function readSensorMode(t: Bus): Promise<SensorMode> {
     throw new TransportError(`Unknown sensor mode ${hex(v)}`);
   }
 
-  return { performance, highFps: (v & HIGH_FPS_BIT) !== 0 };
+  return { performance, frameRateBoost: (v & FRAME_RATE_BOOST_BIT) !== 0 };
 }
 
 export async function writeSensorMode(t: Bus, sm: SensorMode): Promise<void> {
   return writeSensorOption(
     t,
     SensorSub.sensorMode,
-    sm.performance | (sm.highFps ? HIGH_FPS_BIT : 0),
+    sm.performance | (sm.frameRateBoost ? FRAME_RATE_BOOST_BIT : 0),
   );
 }

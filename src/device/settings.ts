@@ -65,7 +65,7 @@ export const performanceModeSetting: DeviceSetting<SensorMode> = {
   key: "performanceMode",
   read: readSensorMode,
   write: writeSensorMode,
-  equals: (a, b) => a.performance === b.performance && a.highFps === b.highFps,
+  equals: (a, b) => a.performance === b.performance && a.frameRateBoost === b.frameRateBoost,
 };
 
 export const angleSnappingSetting: DeviceSetting<boolean> = {
