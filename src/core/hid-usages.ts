@@ -1,5 +1,3 @@
-/** HID usage IDs, by name. Vocabulary for the UI; the button codec itself is numeric. */
-
 export const KEY_USAGE = {
   a: 0x04,
   b: 0x05,
