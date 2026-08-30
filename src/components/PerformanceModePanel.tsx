@@ -26,8 +26,9 @@ export default function PerformanceModePanel() {
   const highRate = polling.value !== undefined && isHighPollingRate(polling.value);
   const current = mode.value;
   const shownPerformance = highRate ? PerformanceMode.wired : current?.performance;
-  const hasHighFps = identity.sensor === Sensor.PAW3950;
-  const canHighFps = hasHighFps && current?.performance === PerformanceMode.wired;
+  const supportsFrameRateBoost = identity.sensor === Sensor.PAW3950;
+  const canToggleFrameRateBoost =
+    supportsFrameRateBoost && current?.performance === PerformanceMode.wired;
 
   return (
     <div>
@@ -41,7 +42,10 @@ export default function PerformanceModePanel() {
             disabled={busy || highRate || current === undefined}
             onClick={() =>
               current &&
-              mode.set({ performance: v, highFps: v === PerformanceMode.wired && current.highFps })
+              mode.set({
+                performance: v,
+                frameRateBoost: v === PerformanceMode.wired && current.frameRateBoost,
+              })
             }
             {...stylex.props(v === shownPerformance && colorStyles.active)}
           >
@@ -49,13 +53,13 @@ export default function PerformanceModePanel() {
           </button>
         ))}
       </div>
-      {hasHighFps && (
+      {supportsFrameRateBoost && (
         <label>
           <input
             type="checkbox"
-            checked={current?.highFps ?? false}
-            disabled={busy || !canHighFps}
-            onChange={(e) => current && mode.set({ ...current, highFps: e.target.checked })}
+            checked={current?.frameRateBoost ?? false}
+            disabled={busy || !canToggleFrameRateBoost}
+            onChange={(e) => current && mode.set({ ...current, frameRateBoost: e.target.checked })}
           />
           High FPS
         </label>
