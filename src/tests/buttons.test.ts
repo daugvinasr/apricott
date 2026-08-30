@@ -7,6 +7,7 @@ import {
   readButton,
   writeButton,
 } from "@/core/commands";
+import { MULTIMEDIA_USAGE } from "@/core/hid-usages";
 import { fakeBus } from "./fake-bus";
 
 it("reads LE32 code after matrix check", async () => {
@@ -38,15 +39,17 @@ describe("action codes", () => {
     [{ type: "dpi", op: "plus" }, 0x00010007],
     [{ type: "dpi", op: "minus" }, 0x00020007],
     [{ type: "dpiSet", stage: 5 }, 0x05040007],
-    [{ type: "special", kind: "switchProfile" }, 0x0000f10a],
     [{ type: "special", kind: "rapidFire" }, 0x0218f00a],
-    [{ type: "consumer", usage: 0xcd }, 0x00cd0003],
-    [{ type: "consumer", usage: 0x223 }, 0x02230003],
-    [{ type: "consumer", usage: 0x22a }, 0x022a0003],
+    [{ type: "multimedia", usage: MULTIMEDIA_USAGE.playPause }, 0x00cd0003],
+    [{ type: "multimedia", usage: MULTIMEDIA_USAGE.browserHome }, 0x02230003],
+    [{ type: "multimedia", usage: MULTIMEDIA_USAGE.browserFavorites }, 0x022a0003],
     [{ type: "macro", bufferId: 3 }, 0x00030009],
     [{ type: "key", usage: 0x04, usage2: 0, modifiers: [] }, 0x00040000],
-    [{ type: "key", usage: 0x04, usage2: 0, modifiers: ["lctrl", "lshift"] }, 0x00040300],
-    [{ type: "key", usage: 0x04, usage2: 0x05, modifiers: ["lgui"] }, 0x05040800],
+    [{ type: "key", usage: 0x04, usage2: 0, modifiers: ["controlLeft", "shiftLeft"] }, 0x00040300],
+    [{ type: "key", usage: 0x04, usage2: 0x05, modifiers: ["metaLeft"] }, 0x05040800],
+    [{ type: "key", usage: 0x04, usage2: 0xff, modifiers: [] }, 0xff040000],
+    [{ type: "keys3", usages: [0x04, 0x05, 0x06] }, 0x06050480],
+    [{ type: "keys3", usages: [0xe0, 0xe2, 0x4c] }, 0x4ce2e080],
   ];
 
   it("encodes the protocol table", () => {
@@ -57,27 +60,10 @@ describe("action codes", () => {
     for (const [action, code] of table) expect(decodeAction(code)).toEqual(action);
   });
 
-  it("round-trips three-key combos (class 0x80)", () => {
-    const a: ButtonAction = { type: "keys3", usages: [0x04, 0x05, 0x06] };
-    expect(encodeAction(a)).toBe(0x06050480);
-    expect(decodeAction(0x06050480)).toEqual(a);
-  });
-
   it("passes unknown codes through", () => {
-    expect(decodeAction(0x01c90006)).toEqual({ type: "unknown", code: 0x01c90006 });
     expect(decodeAction(0x0000ff0a)).toEqual({ type: "unknown", code: 0x0000ff0a });
+    expect(decodeAction(0x0000f10a)).toEqual({ type: "unknown", code: 0x0000f10a });
+    expect(decodeAction(0x01c90006)).toEqual({ type: "unknown", code: 0x01c90006 });
     expect(encodeAction({ type: "unknown", code: 0xdeadbeef })).toBe(0xdeadbeef);
-  });
-
-  it("handles high-bit codes without sign issues", () => {
-    expect(encodeAction({ type: "key", usage: 0x04, usage2: 0xff, modifiers: [] })).toBe(
-      0xff040000,
-    );
-    expect(decodeAction(0xff040000)).toEqual({
-      type: "key",
-      usage: 0x04,
-      usage2: 0xff,
-      modifiers: [],
-    });
   });
 });
