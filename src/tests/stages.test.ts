@@ -1,6 +1,6 @@
 import { expect, it } from "vite-plus/test";
 import { fakeBus } from "./fake-bus";
-import { readStages, writeStages } from "../core/commands/stages";
+import { readStages, writeStages } from "@/core/commands";
 
 it("reads all five bytes unclamped", async () => {
   const { bus } = fakeBus(() => [0, 4, 2, 1, 1]);

@@ -1,8 +1,7 @@
 import { expect, it } from "vite-plus/test";
-import { TransportError } from "../core/errors";
+import { TransportError } from "@/core/errors";
 import { fakeBus } from "./fake-bus";
-import { Sensor } from "../core/commands/identity";
-import { isAwake, readIdentity } from "../core/commands/identity";
+import { isAwake, readIdentity, Sensor } from "@/core/commands/identity";
 
 it("reads wired identity", async () => {
   const { bus, reads } = fakeBus(() => [1, 6, 0, Sensor.PAW3950, 3]);

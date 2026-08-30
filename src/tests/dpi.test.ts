@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { Sensor } from "../core/commands/identity";
+import { Sensor } from "@/core/commands/identity";
 import {
   DpiAxis,
   dpiToHw,
@@ -7,7 +7,7 @@ import {
   readDpiStage,
   snapDpi,
   writeDpiStage,
-} from "../core/commands/dpi";
+} from "@/core/commands/dpi";
 import { fakeBus } from "./fake-bus";
 
 it("reads LE16 hw and reserved, validating stage echo", async () => {

@@ -1,6 +1,6 @@
-import { SLEEP_TIMERS } from "../core/commands";
-import { sleepTimerSetting } from "../device/settings";
-import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
+import { SLEEP_TIMERS } from "@/core/commands";
+import { sleepTimerSetting } from "@/device/settings";
+import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
 
 const styles = stylex.create({

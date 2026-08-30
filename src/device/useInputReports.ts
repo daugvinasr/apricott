@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { type QueryClient, useQuery } from "@tanstack/react-query";
-import { Frame } from "../core/bytes";
-import { type InputReport, parseInputReport } from "../core/commands";
+import { Frame } from "@/core/bytes";
+import { type InputReport, parseInputReport } from "@/core/commands";
 import type { Device } from "./context";
 import type { DeviceSetting } from "./useDeviceSetting";
 import { debounceSetting, motionSyncSetting, pollingRateSetting, stagesSetting } from "./settings";

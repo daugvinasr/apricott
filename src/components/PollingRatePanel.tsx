@@ -1,7 +1,7 @@
-import { supportedPollingRates } from "../core/commands";
-import { pollingRateSetting } from "../device/settings";
-import { useConnectedDevice } from "../device/context";
-import { useDeviceBusy, useDeviceSetting } from "../device/useDeviceSetting";
+import { supportedPollingRates } from "@/core/commands";
+import { pollingRateSetting } from "@/device/settings";
+import { useConnectedDevice } from "@/device/context";
+import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
 import * as stylex from "@stylexjs/stylex";
 
 const colorStyles = stylex.create({

@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
-import { readIdentity } from "../core/commands";
-import { DEVICE_FILTERS, Transport } from "../core/transport";
+import { readIdentity } from "@/core/commands";
+import { DEVICE_FILTERS, Transport } from "@/core/transport";
 import {
   type Connection,
   ConnectionContext,

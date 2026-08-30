@@ -1,4 +1,4 @@
-import { useInputReport } from "../device/useInputReports";
+import { useInputReport } from "@/device/useInputReports";
 
 export default function InputReportPanel() {
   const report = useInputReport();

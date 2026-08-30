@@ -1,5 +1,5 @@
-import { Frame } from "../core/bytes";
-import type { Bus } from "../core/commands";
+import { Frame } from "@/core/bytes";
+import type { Bus } from "@/core/commands";
 
 export interface Call {
   op: number;

@@ -1,6 +1,7 @@
 import { defineConfig } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import stylex from "@stylexjs/unplugin";
+import path from "path";
 
 export default defineConfig({
   plugins: [
@@ -9,6 +10,11 @@ export default defineConfig({
       useCSSLayers: true,
     }),
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   fmt: {},
   lint: {
     plugins: ["react", "typescript", "oxc"],
