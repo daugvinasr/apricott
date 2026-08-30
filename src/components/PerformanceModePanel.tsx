@@ -44,7 +44,7 @@ export default function PerformanceModePanel() {
               current &&
               mode.set({
                 performance: v,
-                frameRateBoost: v === PerformanceMode.wired && current.frameRateBoost,
+                frameRateBoost: current.frameRateBoost,
               })
             }
             {...stylex.props(v === shownPerformance && colorStyles.active)}
