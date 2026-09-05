@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { Connected, DeviceProvider } from "./device/connection";
 import { useConnection } from "./device/context";
 import DeviceHero from "./components/DeviceHero";
@@ -59,7 +60,7 @@ function Configurator() {
     <Connected>
       <Shell
         start={
-          <LayoutPanel width={360} hasDivider label="Device" padding={6}>
+          <LayoutPanel width={360} hasDivider label={m.device()} padding={6}>
             <VStack gap={6}>
               <DeviceHero identity={device.identity} />
               <InputReportPanel />

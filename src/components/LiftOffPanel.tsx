@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { supportedLiftOffs } from "@/core/commands";
 import { liftOffSetting } from "@/device/settings";
 import { useConnectedDevice } from "@/device/context";
@@ -12,12 +13,9 @@ export default function LiftOffPanel() {
   const liftOff = useDeviceSetting(liftOffSetting);
 
   return (
-    <SettingSection
-      title="Lift-off distance"
-      description="How far the mouse can lift before the sensor stops tracking."
-    >
+    <SettingSection title={m.liftOffDistance()} description={m.liftOffDistanceDescription()}>
       <ChoiceGroup
-        label="Lift-off distance"
+        label={m.liftOffDistance()}
         options={supportedLiftOffs(identity.sensor)}
         value={liftOff.shown}
         format={(v) => LIFT_OFF_LABELS[v]}

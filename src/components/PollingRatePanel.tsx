@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { supportedPollingRates } from "@/core/commands";
 import { pollingRateSetting } from "@/device/settings";
 import { useConnectedDevice } from "@/device/context";
@@ -12,12 +13,12 @@ export default function PollingRatePanel() {
   const rates = [...supportedPollingRates(identity.link)].sort((a, b) => a - b);
 
   return (
-    <SettingSection title="Polling rate" description="How often the mouse reports to the computer.">
+    <SettingSection title={m.pollingRate()} description={m.pollingRateDescription()}>
       <ChoiceGroup
-        label="Polling rate"
+        label={m.pollingRate()}
         options={rates}
         value={polling.shown}
-        format={(hz) => `${hz} Hz`}
+        format={(hz) => m.hertz({ value: hz })}
         isDisabled={polling.isDisabled}
         onChange={polling.set}
       />

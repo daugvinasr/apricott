@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { SLEEP_TIMERS } from "@/core/commands";
 import { sleepTimerSetting } from "@/device/settings";
 import { useDeviceSetting } from "@/device/useDeviceSetting";
@@ -13,9 +14,9 @@ export default function SleepTimerPanel() {
   const sleep = useDeviceSetting(sleepTimerSetting);
 
   return (
-    <SettingSection title="Sleep timer" description="Idle time before the mouse goes to sleep.">
+    <SettingSection title={m.sleepTimer()} description={m.sleepTimerDescription()}>
       <Selector
-        label="Sleep timer"
+        label={m.sleepTimer()}
         isLabelHidden
         options={OPTIONS}
         value={sleep.shown === undefined ? undefined : String(sleep.shown)}

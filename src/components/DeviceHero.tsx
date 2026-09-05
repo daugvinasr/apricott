@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { type Identity, MODEL_NAMES, Sensor } from "@/core/commands";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Section } from "@astryxdesign/core/Section";
@@ -9,8 +10,8 @@ import { SENSOR_LABELS } from "./labels";
 import { renderFor } from "./renders";
 
 function linkLabel(link: Identity["link"]): string {
-  if (link.kind === "wired") return "wired";
-  return link.receiver8k ? "wireless, 8K receiver" : "wireless";
+  if (link.kind === "wired") return m.linkWired();
+  return link.receiver8k ? m.linkWireless8k() : m.linkWireless();
 }
 
 export default function DeviceHero({ identity }: { identity: Identity }) {
@@ -31,10 +32,13 @@ export default function DeviceHero({ identity }: { identity: Identity }) {
           <Heading level={1} type="display-2">
             {name}
           </Heading>
-          {identity.sensor === Sensor.PAW3950 && <Token label="Pro" />}
+          {identity.sensor === Sensor.PAW3950 && <Token label={m.pro()} />}
         </HStack>
         <Text color="secondary">
-          {SENSOR_LABELS[identity.sensor]}, {linkLabel(identity.link)}
+          {m.sensorAndLink({
+            sensor: SENSOR_LABELS[identity.sensor],
+            link: linkLabel(identity.link),
+          })}
         </Text>
       </VStack>
     </VStack>

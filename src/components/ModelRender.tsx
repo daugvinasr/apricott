@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { Heading } from "@astryxdesign/core/Heading";
 import { VStack } from "@astryxdesign/core/Stack";
 import * as stylex from "@stylexjs/stylex";
@@ -36,7 +37,7 @@ export function ModelRender({
   return (
     <img
       src={src}
-      alt={`${name} mouse, top view`}
+      alt={m.mouseTopView({ name })}
       width={203}
       height={390}
       {...stylex.props(styles.render, styles.delay(delayMs))}
