@@ -1,13 +1,32 @@
 import { paraglideVitePlugin } from "@inlang/paraglide-js";
-import { defineConfig } from "vite-plus";
+import { defineConfig, lazyPlugins } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import stylex from "@stylexjs/unplugin";
 import path from "path";
 import unfonts from "unplugin-fonts/vite";
+import { PARAGLIDE_OUTDIR_PATH, PARAGLIDE_PROJECT_PATH } from "./scripts/build-translations";
+
+const isDev = process.env.NODE_ENV === "development";
 
 export default defineConfig({
-  plugins: [
-    paraglideVitePlugin({ project: "./project.inlang", outdir: "./src/paraglide" }),
+  run: {
+    tasks: {
+      "build:translations": {
+        command: "node ./scripts/build-translations.ts",
+        input: [
+          "package.json",
+          "./project.inlang/settings.json",
+          "./messages/*.json",
+          "./src/paraglide",
+          "./scripts/build-translations.ts",
+        ],
+      },
+    },
+  },
+  plugins: lazyPlugins(() => [
+    isDev
+      ? paraglideVitePlugin({ project: PARAGLIDE_PROJECT_PATH, outdir: PARAGLIDE_OUTDIR_PATH })
+      : undefined,
     react(),
     stylex.vite({
       useCSSLayers: true,
@@ -18,7 +37,7 @@ export default defineConfig({
         families: ["Figtree"],
       },
     }),
-  ],
+  ]),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
