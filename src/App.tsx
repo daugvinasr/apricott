@@ -50,7 +50,7 @@ function Header() {
           icon={<Icon icon={GitHubIcon} size="sm" />}
           isIconOnly
           variant="ghost"
-          href="https://github.com/daugvinasr/open-incott"
+          href="https://github.com/daugvinasr/apricott"
           target="_blank"
         />
       </HStack>
