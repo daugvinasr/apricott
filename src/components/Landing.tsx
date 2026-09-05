@@ -7,11 +7,12 @@ import { ModelRender } from "./ModelRender";
 import { LINEUP } from "./renders";
 import { m } from "@/paraglide/messages";
 import { useState } from "react";
+import { useHidSupported } from "@/device/useHidSupported";
 
 const STAGGER_MS = 70;
 
 export default function Landing({ onConnect }: { onConnect: () => Promise<void> }) {
-  const hidSupported = "hid" in navigator;
+  const hidSupported = useHidSupported();
   const [error, setError] = useState<string | null>(null);
 
   const connect = async () => {
