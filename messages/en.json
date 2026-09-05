@@ -5,6 +5,7 @@
   "landingIntro": "Plug in the mouse or its receiver, then pick it from the browser prompt. Settings are read from the device and saved back as you change them.",
   "hidUnsupportedTitle": "This browser can't reach USB devices",
   "hidUnsupportedDescription": "Open this page in Chrome or Edge on a desktop computer.",
+  "connectFailedTitle": "Couldn't connect to the mouse",
   "device": "Device",
   "github": "GitHub",
   "pro": "Pro",

@@ -6,10 +6,22 @@ import { Text } from "@astryxdesign/core/Text";
 import { ModelRender } from "./ModelRender";
 import { LINEUP } from "./renders";
 import { m } from "@/paraglide/messages";
+import { useState } from "react";
+
 const STAGGER_MS = 70;
 
-export default function Landing({ onConnect }: { onConnect: () => void }) {
+export default function Landing({ onConnect }: { onConnect: () => Promise<void> }) {
   const hidSupported = "hid" in navigator;
+  const [error, setError] = useState<string | null>(null);
+
+  const connect = async () => {
+    setError(null);
+    try {
+      await onConnect();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
 
   return (
     <VStack gap={10} align="center" paddingBlock={10}>
@@ -30,7 +42,10 @@ export default function Landing({ onConnect }: { onConnect: () => void }) {
         </Text>
       </VStack>
       {hidSupported ? (
-        <Button label={m.connectMouseButton()} variant="primary" clickAction={onConnect} />
+        <VStack gap={4} align="center">
+          <Button label={m.connectMouseButton()} variant="primary" clickAction={connect} />
+          {error && <Banner status="error" title={m.connectFailedTitle()} description={error} />}
+        </VStack>
       ) : (
         <Banner
           status="warning"
