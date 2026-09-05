@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "tsc -b && vp build",
+    "build": "vp run build:translations && tsc -b && vp build",
     "preview": "vp preview",
     "test": "vp test",
     "typecheck": "tsc -b",
@@ -36,5 +36,12 @@
     "unplugin-fonts": "^2.0.0",
     "vite": "catalog:",
     "vite-plus": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.25.0",
+      "onFail": "download"
+    }
   }
 }
