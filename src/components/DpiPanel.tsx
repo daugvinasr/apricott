@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { MAX_DPI_STAGES, SENSOR_DPI, STAGE_INDICES, type Sensor, snapDpi } from "@/core/commands";
 import { type DpiStagePair, dpiStagesSetting, stagesSetting } from "@/device/settings";
 import { useConnectedDevice } from "@/device/context";
@@ -66,12 +67,12 @@ function DpiStageRow({
   disabled: boolean;
   onChange: (pair: DpiStagePair) => void;
 }) {
-  const name = `Stage ${stage + 1}`;
+  const n = stage + 1;
 
   if (!separateXY) {
     return (
       <DpiSlider
-        label={name}
+        label={m.stage({ n })}
         sensor={sensor}
         value={pair.x.dpi}
         disabled={disabled}
@@ -83,14 +84,14 @@ function DpiStageRow({
   return (
     <HStack gap={4}>
       <DpiSlider
-        label={`${name} X`}
+        label={m.stageX({ n })}
         sensor={sensor}
         value={pair.x.dpi}
         disabled={disabled}
         onCommit={(dpi) => onChange(withDpi(pair, dpi, pair.y.dpi))}
       />
       <DpiSlider
-        label={`${name} Y`}
+        label={m.stageY({ n })}
         sensor={sensor}
         value={pair.y.dpi}
         disabled={disabled}
@@ -119,13 +120,10 @@ export default function DpiPanel() {
   const syncXY = () => dpi.set(pairs.map((p) => withDpi(p, p.x.dpi, p.x.dpi)));
 
   return (
-    <SettingSection
-      title="DPI"
-      description="Sensitivity stages you cycle through with the DPI button."
-    >
+    <SettingSection title={m.dpi()} description={m.dpiDescription()}>
       <HStack gap={4} align="end">
         <NumberInput
-          label="Stages"
+          label={m.stages()}
           value={cfg?.count}
           min={1}
           max={MAX_DPI_STAGES}
@@ -138,7 +136,7 @@ export default function DpiPanel() {
           width={140}
         />
         <Switch
-          label="Adjust X/Y separately"
+          label={m.adjustXySeparately()}
           value={separateXY}
           isDisabled={dpi.isDisabled}
           onChange={(checked) => {
@@ -150,10 +148,10 @@ export default function DpiPanel() {
       {cfg && (
         <VStack gap={3}>
           <ChoiceGroup
-            label="Active stage"
+            label={m.activeStage()}
             options={STAGE_INDICES.slice(0, cfg.count)}
             value={cfg.active}
-            format={(i) => `Stage ${i + 1}`}
+            format={(i) => m.stage({ n: i + 1 })}
             isDisabled={stages.isDisabled}
             onChange={(active) => stages.set({ ...cfg, active })}
           />

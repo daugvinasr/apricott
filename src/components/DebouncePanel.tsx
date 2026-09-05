@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { MAX_DEBOUNCE_MS, MIN_DEBOUNCE_MS } from "@/core/commands";
 import { debounceSetting } from "@/device/settings";
 import { useDeviceSetting } from "@/device/useDeviceSetting";
@@ -9,14 +10,14 @@ export default function DebouncePanel() {
   const debounce = useDeviceSetting(debounceSetting);
 
   return (
-    <SettingSection title="Debounce" description="Time a click must hold before it counts.">
+    <SettingSection title={m.debounce()} description={m.debounceDescription()}>
       <NumberInput
-        label="Debounce"
+        label={m.debounce()}
         isLabelHidden
         value={debounce.shown}
         min={MIN_DEBOUNCE_MS}
         max={MAX_DEBOUNCE_MS}
-        units="ms"
+        units={m.unitMs()}
         isIntegerOnly
         hasNumberSteppers
         isDisabled={debounce.isDisabled}

@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { useInputReport } from "@/device/inputReports";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { Text } from "@astryxdesign/core/Text";
@@ -7,20 +8,28 @@ export default function InputReportPanel() {
   const report = useInputReport();
 
   if (!report) {
-    return <Text color="secondary">Waiting for the mouse to report in…</Text>;
+    return <Text color="secondary">{m.waitingForReport()}</Text>;
   }
 
   return (
     <MetadataList label={{ position: "start", width: 120 }}>
-      <MetadataListItem label="Battery">
-        {report.batteryPercent}%{report.charging ? ", charging" : ""}
+      <MetadataListItem label={m.battery()}>
+        {report.charging
+          ? m.batteryLevelCharging({ percent: report.batteryPercent })
+          : m.batteryLevel({ percent: report.batteryPercent })}
       </MetadataListItem>
-      <MetadataListItem label="Polling rate">{report.pollingRateHz} Hz</MetadataListItem>
-      <MetadataListItem label="DPI stage">{report.activeStage + 1}</MetadataListItem>
-      <MetadataListItem label="Debounce">{report.debounceMs} ms</MetadataListItem>
-      <MetadataListItem label="Motion sync">{report.motionSync ? "On" : "Off"}</MetadataListItem>
-      <MetadataListItem label="Lift-off">
-        {report.liftOff === undefined ? "Unknown" : LIFT_OFF_LABELS[report.liftOff]}
+      <MetadataListItem label={m.pollingRate()}>
+        {m.hertz({ value: report.pollingRateHz })}
+      </MetadataListItem>
+      <MetadataListItem label={m.dpiStage()}>{report.activeStage + 1}</MetadataListItem>
+      <MetadataListItem label={m.debounce()}>
+        {m.milliseconds({ value: report.debounceMs })}
+      </MetadataListItem>
+      <MetadataListItem label={m.motionSync()}>
+        {report.motionSync ? m.on() : m.off()}
+      </MetadataListItem>
+      <MetadataListItem label={m.liftOff()}>
+        {report.liftOff === undefined ? m.unknown() : LIFT_OFF_LABELS[report.liftOff]}
       </MetadataListItem>
     </MetadataList>
   );

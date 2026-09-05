@@ -1,3 +1,4 @@
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import { defineConfig } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import stylex from "@stylexjs/unplugin";
@@ -6,6 +7,7 @@ import unfonts from "unplugin-fonts/vite";
 
 export default defineConfig({
   plugins: [
+    paraglideVitePlugin({ project: "./project.inlang", outdir: "./src/paraglide" }),
     react(),
     stylex.vite({
       useCSSLayers: true,

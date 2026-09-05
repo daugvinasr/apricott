@@ -23,6 +23,9 @@
   "devDependencies": {
     "@astryxdesign/cli": "^0.4.6",
     "@fontsource/figtree": "^5.3.0",
+    "@inlang/paraglide-js": "^2.25.0",
+    "@inlang/plugin-m-function-matcher": "^2.2.12",
+    "@inlang/plugin-message-format": "^4.4.3",
     "@oxlint/plugins": "^1.78.0",
     "@stylexjs/unplugin": "^0.19.0",
     "@types/node": "^24.13.3",

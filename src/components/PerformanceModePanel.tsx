@@ -1,3 +1,4 @@
+import { m } from "@/paraglide/messages";
 import { isHighPollingRate, PerformanceMode, Sensor } from "@/core/commands";
 import { pollingRateSetting, performanceModeSetting } from "@/device/settings";
 import { useConnectedDevice } from "@/device/context";
@@ -8,17 +9,16 @@ import { pickChoice } from "./choice";
 import SettingError from "./SettingError";
 import SettingSection from "./SettingSection";
 
-const PERFORMANCE_OPTIONS = {
-  [PerformanceMode.lowPower]: { label: "Low power", description: "Longest battery life" },
-  [PerformanceMode.highPerformance]: {
-    label: "High performance",
-    description: "Lower latency, moderate battery use",
-  },
-  [PerformanceMode.wired]: {
-    label: "Maximum performance",
-    description: "Lowest latency, highest battery use",
-  },
-} satisfies Record<PerformanceMode, { label: string; description: string }>;
+function performanceOption(mode: PerformanceMode) {
+  switch (mode) {
+    case PerformanceMode.lowPower:
+      return { label: m.lowPower(), description: m.lowPowerDescription() };
+    case PerformanceMode.highPerformance:
+      return { label: m.highPerformance(), description: m.highPerformanceDescription() };
+    case PerformanceMode.wired:
+      return { label: m.maximumPerformance(), description: m.maximumPerformanceDescription() };
+  }
+}
 
 const PERFORMANCE_MODES = Object.values(PerformanceMode);
 
@@ -36,15 +36,13 @@ export default function PerformanceModePanel() {
     supportsFrameRateBoost && current?.performance === PerformanceMode.wired;
 
   return (
-    <SettingSection title="Performance mode" description="Trade battery life for lower latency.">
+    <SettingSection title={m.performanceMode()} description={m.performanceModeDescription()}>
       <RadioList
-        label="Performance mode"
+        label={m.performanceMode()}
         isLabelHidden
         value={shownPerformance === undefined ? "" : String(shownPerformance)}
         isDisabled={mode.isDisabled || highPollingRate}
-        disabledMessage={
-          highPollingRate ? "Polling rates above 1000 Hz force wired mode" : undefined
-        }
+        disabledMessage={highPollingRate ? m.highPollingForcesWired() : undefined}
         onChange={(v) => {
           const performance = pickChoice(PERFORMANCE_MODES, v);
           if (current && performance !== undefined) {
@@ -53,15 +51,15 @@ export default function PerformanceModePanel() {
         }}
       >
         {PERFORMANCE_MODES.map((v) => (
-          <RadioListItem key={v} value={String(v)} {...PERFORMANCE_OPTIONS[v]} />
+          <RadioListItem key={v} value={String(v)} {...performanceOption(v)} />
         ))}
       </RadioList>
       {supportsFrameRateBoost && (
         <Switch
-          label="High FPS"
+          label={m.highFps()}
           value={current?.frameRateBoost ?? false}
           isDisabled={mode.isDisabled || !canToggleFrameRateBoost}
-          disabledMessage={canToggleFrameRateBoost ? undefined : "Only available in wired mode"}
+          disabledMessage={canToggleFrameRateBoost ? undefined : m.onlyInWiredMode()}
           onChange={(checked) => current && mode.set({ ...current, frameRateBoost: checked })}
         />
       )}
