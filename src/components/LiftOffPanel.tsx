@@ -1,45 +1,30 @@
-import { LiftOff, supportedLiftOffs } from "@/core/commands";
+import { supportedLiftOffs } from "@/core/commands";
 import { liftOffSetting } from "@/device/settings";
 import { useConnectedDevice } from "@/device/context";
-import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
-import * as stylex from "@stylexjs/stylex";
-
-const colorStyles = stylex.create({
-  active: {
-    backgroundColor: "orange",
-  },
-});
-
-const LIFT_OFF_LABELS = {
-  [LiftOff.mm07]: "0.7 mm",
-  [LiftOff.mm1]: "1 mm",
-  [LiftOff.mm2]: "2 mm",
-} satisfies Record<LiftOff, string>;
+import { useDeviceSetting } from "@/device/useDeviceSetting";
+import ChoiceGroup from "./ChoiceGroup";
+import { LIFT_OFF_LABELS } from "./labels";
+import SettingError from "./SettingError";
+import SettingSection from "./SettingSection";
 
 export default function LiftOffPanel() {
   const { identity } = useConnectedDevice();
   const liftOff = useDeviceSetting(liftOffSetting);
-  const busy = useDeviceBusy();
 
   return (
-    <div>
-      <p>Lift-off distance</p>
-      <div role="radiogroup">
-        {supportedLiftOffs(identity.sensor).map((v) => (
-          <button
-            key={v}
-            role="radio"
-            aria-checked={v === liftOff.value}
-            disabled={busy}
-            onClick={() => liftOff.set(v)}
-            {...stylex.props(v === liftOff.value && colorStyles.active)}
-          >
-            {LIFT_OFF_LABELS[v]}
-            {v === liftOff.pending ? " …" : ""}
-          </button>
-        ))}
-      </div>
-      {liftOff.error && <p role="alert">{liftOff.error.message}</p>}
-    </div>
+    <SettingSection
+      title="Lift-off distance"
+      description="How far the mouse can lift before the sensor stops tracking."
+    >
+      <ChoiceGroup
+        label="Lift-off distance"
+        options={supportedLiftOffs(identity.sensor)}
+        value={liftOff.shown}
+        format={(v) => LIFT_OFF_LABELS[v]}
+        isDisabled={liftOff.isDisabled}
+        onChange={liftOff.set}
+      />
+      <SettingError error={liftOff.error} />
+    </SettingSection>
   );
 }

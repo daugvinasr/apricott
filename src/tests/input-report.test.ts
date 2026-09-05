@@ -1,6 +1,6 @@
 import { expect, it } from "vite-plus/test";
 import { Frame } from "@/core/bytes";
-import { parseInputReport } from "@/core/commands";
+import { LiftOff, parseInputReport } from "@/core/commands";
 
 const view = (bytes: number[]) => new Frame(Uint8Array.from(bytes));
 
@@ -14,7 +14,7 @@ it("unpacks all fields", () => {
     debounceMs: 8,
     activeProfile: 1,
     motionSync: true,
-    lodValue: 1,
+    liftOff: LiftOff.mm2,
   });
 });
 
@@ -27,6 +27,6 @@ it("reads zero state", () => {
     debounceMs: 0,
     activeProfile: 0,
     motionSync: false,
-    lodValue: 0,
+    liftOff: LiftOff.mm1,
   });
 });

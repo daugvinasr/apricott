@@ -1,6 +1,6 @@
 import {
   DpiAxis,
-  MAX_DPI_STAGES,
+  STAGE_INDICES,
   type DpiStage,
   readDpiStage,
   readStages,
@@ -97,8 +97,6 @@ export interface DpiStagePair {
   x: DpiStage;
   y: DpiStage;
 }
-
-const STAGE_INDICES = Array.from({ length: MAX_DPI_STAGES }, (_, i) => i);
 
 async function readPair(bus: Bus, sensor: Sensor, stage: number): Promise<DpiStagePair> {
   return {

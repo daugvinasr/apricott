@@ -1,50 +1,32 @@
 import { SLEEP_TIMERS } from "@/core/commands";
 import { sleepTimerSetting } from "@/device/settings";
-import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
-import * as stylex from "@stylexjs/stylex";
+import { useDeviceSetting } from "@/device/useDeviceSetting";
+import { Selector } from "@astryxdesign/core/Selector";
+import { pickChoice } from "./choice";
+import { formatSeconds } from "./labels";
+import SettingError from "./SettingError";
+import SettingSection from "./SettingSection";
 
-const styles = stylex.create({
-  row: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  },
-  amount: {
-    minWidth: "5ch",
-    textAlign: "center",
-  },
-});
+const OPTIONS = SLEEP_TIMERS.map((s) => ({ value: String(s), label: formatSeconds(s) }));
 
 export default function SleepTimerPanel() {
   const sleep = useDeviceSetting(sleepTimerSetting);
-  const busy = useDeviceBusy();
-
-  const shown = sleep.pending ?? sleep.value;
-  const index = shown === undefined ? -1 : SLEEP_TIMERS.indexOf(shown);
-  const prev = index > 0 ? SLEEP_TIMERS[index - 1] : undefined;
-  const next = index >= 0 && index < SLEEP_TIMERS.length - 1 ? SLEEP_TIMERS[index + 1] : undefined;
 
   return (
-    <div>
-      <p>Sleep timer</p>
-      <div {...stylex.props(styles.row)}>
-        <button
-          aria-label="Decrease sleep timer"
-          disabled={busy || prev === undefined}
-          onClick={() => prev !== undefined && sleep.set(prev)}
-        >
-          −
-        </button>
-        <span {...stylex.props(styles.amount)}>{shown === undefined ? "" : `${shown} s`}</span>
-        <button
-          aria-label="Increase sleep timer"
-          disabled={busy || next === undefined}
-          onClick={() => next !== undefined && sleep.set(next)}
-        >
-          +
-        </button>
-      </div>
-      {sleep.error && <p role="alert">{sleep.error.message}</p>}
-    </div>
+    <SettingSection title="Sleep timer" description="Idle time before the mouse goes to sleep.">
+      <Selector
+        label="Sleep timer"
+        isLabelHidden
+        options={OPTIONS}
+        value={sleep.shown === undefined ? undefined : String(sleep.shown)}
+        isDisabled={sleep.isDisabled}
+        onChange={(v) => {
+          const seconds = pickChoice(SLEEP_TIMERS, v);
+          if (seconds !== undefined) sleep.set(seconds);
+        }}
+        width={160}
+      />
+      <SettingError error={sleep.error} />
+    </SettingSection>
   );
 }

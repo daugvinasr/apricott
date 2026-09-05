@@ -1,69 +1,84 @@
-import * as stylex from "@stylexjs/stylex";
-import { MODEL_NAMES, Sensor } from "./core/commands";
 import { Connected, DeviceProvider } from "./device/connection";
 import { useConnection } from "./device/context";
+import DeviceHero from "./components/DeviceHero";
 import DpiPanel from "./components/DpiPanel";
 import InputReportPanel from "./components/InputReportPanel";
+import Landing from "./components/Landing";
 import PollingRatePanel from "./components/PollingRatePanel";
 import LiftOffPanel from "./components/LiftOffPanel";
 import SleepTimerPanel from "./components/SleepTimerPanel";
 import DebouncePanel from "./components/DebouncePanel";
 import PerformanceModePanel from "./components/PerformanceModePanel";
 import SensorTogglesPanel from "./components/SensorTogglesPanel";
+import { Theme } from "@astryxdesign/core/theme";
+import { neutralTheme } from "@astryxdesign/theme-neutral/built";
+import { Layout, LayoutContent, LayoutPanel } from "@astryxdesign/core/Layout";
+import { VStack } from "@astryxdesign/core/Stack";
+import { Divider } from "@astryxdesign/core/Divider";
+import type { ReactNode } from "react";
 
-const colorStyles = stylex.create({
-  button: {
-    backgroundColor: "red",
-  },
-  active: {
-    backgroundColor: "orange",
-  },
-});
+function Settings() {
+  return (
+    <VStack maxWidth={760}>
+      <PollingRatePanel />
+      <Divider isFullBleed />
+      <LiftOffPanel />
+      <Divider isFullBleed />
+      <PerformanceModePanel />
+      <Divider isFullBleed />
+      <SleepTimerPanel />
+      <Divider isFullBleed />
+      <DebouncePanel />
+      <Divider isFullBleed />
+      <SensorTogglesPanel />
+      <Divider isFullBleed />
+      <DpiPanel />
+    </VStack>
+  );
+}
 
-const SENSOR_LABELS = Object.fromEntries(Object.entries(Sensor).map(([name, id]) => [id, name]));
+function Shell({ start, content }: { start?: ReactNode; content: ReactNode }) {
+  return (
+    <Layout
+      contentWidth={1160}
+      padding={6}
+      start={start}
+      content={<LayoutContent padding={6}>{content}</LayoutContent>}
+    />
+  );
+}
 
-function DevicePanel() {
+function Configurator() {
   const { device, connect } = useConnection();
-  const identity = device?.identity;
+
+  if (!device) {
+    return <Shell content={<Landing onConnect={() => connect()} />} />;
+  }
 
   return (
-    <div>
-      <button onClick={() => connect()} {...stylex.props(colorStyles.button)}>
-        Connect
-      </button>
-      {identity && (
-        <pre>
-          {JSON.stringify(
-            {
-              ...identity,
-              name:
-                MODEL_NAMES[identity.model] + (identity.sensor === Sensor.PAW3950 ? " Pro" : ""),
-              sensor: `${SENSOR_LABELS[identity.sensor]} (0x${identity.sensor.toString(16)})`,
-            },
-            null,
-            2,
-          )}
-        </pre>
-      )}
-      <Connected>
-        <InputReportPanel />
-        <DpiPanel />
-        <PollingRatePanel />
-        <LiftOffPanel />
-        <SleepTimerPanel />
-        <DebouncePanel />
-        <PerformanceModePanel />
-        <SensorTogglesPanel />
-      </Connected>
-    </div>
+    <Connected>
+      <Shell
+        start={
+          <LayoutPanel width={360} hasDivider label="Device" padding={6}>
+            <VStack gap={6}>
+              <DeviceHero identity={device.identity} />
+              <InputReportPanel />
+            </VStack>
+          </LayoutPanel>
+        }
+        content={<Settings />}
+      />
+    </Connected>
   );
 }
 
 function App() {
   return (
-    <DeviceProvider>
-      <DevicePanel />
-    </DeviceProvider>
+    <Theme theme={neutralTheme}>
+      <DeviceProvider>
+        <Configurator />
+      </DeviceProvider>
+    </Theme>
   );
 }
 

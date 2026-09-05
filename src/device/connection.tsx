@@ -39,6 +39,11 @@ async function openDevice(): Promise<Device> {
   }
 }
 
+async function teardown(device: Device): Promise<void> {
+  device.queries.clear();
+  await device.transport.close();
+}
+
 export function DeviceProvider({ children }: { children: ReactNode }) {
   const [device, setDevice] = useState<Device | null>(null);
 
@@ -48,7 +53,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       async connect() {
         const next = await openDevice();
         setDevice(next);
-        await device?.transport.close();
+        if (device) await teardown(device);
       },
     }),
     [device],
@@ -62,6 +67,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     const onDisconnect = (e: HIDConnectionEvent) => {
       if (e.device === device.transport.device) {
         setDevice(null);
+        void teardown(device);
       }
     };
 

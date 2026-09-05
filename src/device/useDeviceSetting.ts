@@ -20,8 +20,15 @@ export class ReadbackMismatchError<T> extends Error {
   }
 }
 
+function useDeviceBusy(): boolean {
+  const fetching = useIsFetching();
+  const mutating = useIsMutating();
+  return fetching + mutating > 0;
+}
+
 export function useDeviceSetting<T>(setting: DeviceSetting<T>) {
   const { transport, queries } = useConnectedDevice();
+  const busy = useDeviceBusy();
   const queryKey = [setting.key];
 
   const query = useQuery({ queryKey, queryFn: () => setting.read(transport) });
@@ -48,14 +55,9 @@ export function useDeviceSetting<T>(setting: DeviceSetting<T>) {
 
   return {
     value: query.data,
-    pending: mutation.isPending ? mutation.variables : undefined,
+    shown: mutation.isPending ? mutation.variables : query.data,
     error: mutation.error ?? query.error,
     set: mutation.mutate,
+    isDisabled: busy || query.data === undefined,
   };
-}
-
-export function useDeviceBusy(): boolean {
-  const fetching = useIsFetching();
-  const mutating = useIsMutating();
-  return fetching + mutating > 0;
 }
