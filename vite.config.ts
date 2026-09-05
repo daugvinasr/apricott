@@ -2,9 +2,10 @@ import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import { defineConfig, lazyPlugins } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import stylex from "@stylexjs/unplugin";
-import path from "path";
+import path from "node:path";
 import unfonts from "unplugin-fonts/vite";
 import { PARAGLIDE_OUTDIR_PATH, PARAGLIDE_PROJECT_PATH } from "./scripts/build-translations";
+import { prerender } from "./scripts/prerender";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -37,6 +38,7 @@ export default defineConfig({
         families: ["Figtree"],
       },
     }),
+    prerender(),
   ]),
   resolve: {
     alias: {
