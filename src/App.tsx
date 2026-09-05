@@ -13,8 +13,11 @@ import PerformanceModePanel from "./components/PerformanceModePanel";
 import SensorTogglesPanel from "./components/SensorTogglesPanel";
 import { Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
-import { Layout, LayoutContent, LayoutPanel } from "@astryxdesign/core/Layout";
-import { VStack } from "@astryxdesign/core/Stack";
+import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { HStack, VStack } from "@astryxdesign/core/Stack";
+import { Button } from "@astryxdesign/core/Button";
+import { Icon } from "@astryxdesign/core/Icon";
+import GitHubIcon from "./components/GitHubIcon";
 import { Divider } from "@astryxdesign/core/Divider";
 import type { ReactNode } from "react";
 
@@ -38,9 +41,27 @@ function Settings() {
   );
 }
 
+function Header() {
+  return (
+    <LayoutHeader height={48}>
+      <HStack justify="end" align="center" height="100%">
+        <Button
+          label={m.github()}
+          icon={<Icon icon={GitHubIcon} size="sm" />}
+          isIconOnly
+          variant="ghost"
+          href="https://github.com/daugvinasr/open-incott"
+          target="_blank"
+        />
+      </HStack>
+    </LayoutHeader>
+  );
+}
+
 function Shell({ start, content }: { start?: ReactNode; content: ReactNode }) {
   return (
     <Layout
+      header={<Header />}
       contentWidth={1160}
       padding={6}
       start={start}

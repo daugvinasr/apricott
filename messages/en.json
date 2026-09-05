@@ -6,6 +6,7 @@
   "hidUnsupportedTitle": "This browser can't reach USB devices",
   "hidUnsupportedDescription": "Open this page in Chrome or Edge on a desktop computer.",
   "device": "Device",
+  "github": "GitHub",
   "pro": "Pro",
   "linkWired": "wired",
   "linkWireless": "wireless",
