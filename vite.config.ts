@@ -2,12 +2,19 @@ import { defineConfig } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import stylex from "@stylexjs/unplugin";
 import path from "path";
+import unfonts from "unplugin-fonts/vite";
 
 export default defineConfig({
   plugins: [
     react(),
     stylex.vite({
       useCSSLayers: true,
+    }),
+    unfonts({
+      inlineFontFace: true,
+      fontsource: {
+        families: ["Figtree"],
+      },
     }),
   ],
   resolve: {

@@ -1,38 +1,27 @@
 import { useInputReport } from "@/device/inputReports";
+import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
+import { Text } from "@astryxdesign/core/Text";
+import { LIFT_OFF_LABELS } from "./labels";
 
 export default function InputReportPanel() {
   const report = useInputReport();
 
   if (!report) {
-    return (
-      <div>
-        <p>Status</p>
-        <p>Waiting for input report…</p>
-      </div>
-    );
+    return <Text color="secondary">Waiting for the mouse to report in…</Text>;
   }
 
   return (
-    <div>
-      <p>Status</p>
-      <dl>
-        <dt>Battery</dt>
-        <dd>
-          {report.batteryPercent}%{report.charging ? " (charging)" : ""}
-        </dd>
-        <dt>Polling rate</dt>
-        <dd>{report.pollingRateHz} Hz</dd>
-        <dt>Active stage</dt>
-        <dd>{report.activeStage + 1}</dd>
-        <dt>Active profile</dt>
-        <dd>{report.activeProfile + 1}</dd>
-        <dt>Debounce</dt>
-        <dd>{report.debounceMs} ms</dd>
-        <dt>Motion sync</dt>
-        <dd>{report.motionSync ? "On" : "Off"}</dd>
-        <dt>LOD</dt>
-        <dd>{report.lodValue}</dd>
-      </dl>
-    </div>
+    <MetadataList label={{ position: "start", width: 120 }}>
+      <MetadataListItem label="Battery">
+        {report.batteryPercent}%{report.charging ? ", charging" : ""}
+      </MetadataListItem>
+      <MetadataListItem label="Polling rate">{report.pollingRateHz} Hz</MetadataListItem>
+      <MetadataListItem label="DPI stage">{report.activeStage + 1}</MetadataListItem>
+      <MetadataListItem label="Debounce">{report.debounceMs} ms</MetadataListItem>
+      <MetadataListItem label="Motion sync">{report.motionSync ? "On" : "Off"}</MetadataListItem>
+      <MetadataListItem label="Lift-off">
+        {report.liftOff === undefined ? "Unknown" : LIFT_OFF_LABELS[report.liftOff]}
+      </MetadataListItem>
+    </MetadataList>
   );
 }

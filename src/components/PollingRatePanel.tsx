@@ -1,39 +1,27 @@
 import { supportedPollingRates } from "@/core/commands";
 import { pollingRateSetting } from "@/device/settings";
 import { useConnectedDevice } from "@/device/context";
-import { useDeviceBusy, useDeviceSetting } from "@/device/useDeviceSetting";
-import * as stylex from "@stylexjs/stylex";
-
-const colorStyles = stylex.create({
-  active: {
-    backgroundColor: "orange",
-  },
-});
+import { useDeviceSetting } from "@/device/useDeviceSetting";
+import ChoiceGroup from "./ChoiceGroup";
+import SettingError from "./SettingError";
+import SettingSection from "./SettingSection";
 
 export default function PollingRatePanel() {
   const { identity } = useConnectedDevice();
   const polling = useDeviceSetting(pollingRateSetting);
-  const busy = useDeviceBusy();
   const rates = [...supportedPollingRates(identity.link)].sort((a, b) => a - b);
 
   return (
-    <div>
-      <p>Polling rate{busy ? " (busy)" : ""}</p>
-      <div role="radiogroup">
-        {rates.map((hz) => (
-          <button
-            key={hz}
-            role="radio"
-            aria-checked={hz === polling.value}
-            disabled={busy}
-            onClick={() => polling.set(hz)}
-            {...stylex.props(hz === polling.value && colorStyles.active)}
-          >
-            {hz} Hz{hz === polling.pending ? " …" : ""}
-          </button>
-        ))}
-      </div>
-      {polling.error && <p role="alert">{polling.error.message}</p>}
-    </div>
+    <SettingSection title="Polling rate" description="How often the mouse reports to the computer.">
+      <ChoiceGroup
+        label="Polling rate"
+        options={rates}
+        value={polling.shown}
+        format={(hz) => `${hz} Hz`}
+        isDisabled={polling.isDisabled}
+        onChange={polling.set}
+      />
+      <SettingError error={polling.error} />
+    </SettingSection>
   );
 }

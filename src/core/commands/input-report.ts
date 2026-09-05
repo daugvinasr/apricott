@@ -1,4 +1,5 @@
 import type { Frame } from "../bytes";
+import { type LiftOff, isLiftOff } from "./lift-off";
 import { type PollingRate, pollingIndexToHz } from "./polling-rate";
 
 export interface InputReport {
@@ -9,7 +10,7 @@ export interface InputReport {
   debounceMs: number;
   activeProfile: number;
   motionSync: boolean;
-  lodValue: number;
+  liftOff: LiftOff | undefined;
 }
 
 export function parseInputReport(f: Frame): InputReport {
@@ -17,6 +18,7 @@ export function parseInputReport(f: Frame): InputReport {
   const b1 = f.u8(1);
   const b2 = f.u8(2);
   const b6 = f.u8(6);
+  const lod = b6 >> 4;
   return {
     charging: (b0 & 0x80) !== 0,
     batteryPercent: b0 & 0x7f,
@@ -25,6 +27,6 @@ export function parseInputReport(f: Frame): InputReport {
     debounceMs: b2 & 0x3f,
     activeProfile: b2 >> 6,
     motionSync: (b6 & 0x0f) !== 0,
-    lodValue: b6 >> 4,
+    liftOff: isLiftOff(lod) ? lod : undefined,
   };
 }

@@ -12,7 +12,7 @@ export const LiftOff = {
 
 export type LiftOff = (typeof LiftOff)[keyof typeof LiftOff];
 
-const isLiftOff = isValueOf(LiftOff);
+export const isLiftOff = isValueOf(LiftOff);
 
 // 0.7 mm is only available on the PAW3950
 export function supportedLiftOffs(sensor: Sensor): readonly LiftOff[] {
