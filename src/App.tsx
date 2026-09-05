@@ -74,7 +74,7 @@ function Configurator() {
   const { device, connect } = useConnection();
 
   if (!device) {
-    return <Shell content={<Landing onConnect={() => connect()} />} />;
+    return <Shell content={<Landing onConnect={connect} />} />;
   }
 
   return (

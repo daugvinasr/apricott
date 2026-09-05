@@ -25,8 +25,13 @@ function createDeviceQueryClient(): QueryClient {
   });
 }
 
-async function openDevice(): Promise<Device> {
+async function openDevice(): Promise<Device | null> {
   const devices = await navigator.hid.requestDevice({ filters: DEVICE_FILTERS });
+
+  if (devices.length === 0) {
+    return null;
+  }
+
   const transport = await Transport.open(devices);
 
   try {
@@ -52,6 +57,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       device,
       async connect() {
         const next = await openDevice();
+        if (!next) return;
         setDevice(next);
         if (device) await teardown(device);
       },
