@@ -11,6 +11,7 @@ import SleepTimerPanel from "./components/SleepTimerPanel";
 import DebouncePanel from "./components/DebouncePanel";
 import PerformanceModePanel from "./components/PerformanceModePanel";
 import SensorTogglesPanel from "./components/SensorTogglesPanel";
+import ResetDefaultsPanel from "./components/ResetDefaultsPanel";
 import { Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
@@ -37,6 +38,8 @@ function Settings() {
       <SensorTogglesPanel />
       <Divider isFullBleed />
       <DpiPanel />
+      <Divider isFullBleed />
+      <ResetDefaultsPanel />
     </VStack>
   );
 }

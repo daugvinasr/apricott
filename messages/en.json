@@ -62,5 +62,12 @@
   "liftOff1mm": "1 mm",
   "liftOff2mm": "2 mm",
   "seconds": "{value} s",
-  "minutes": "{value} min"
+  "minutes": "{value} min",
+  "cancel": "Cancel",
+  "resetDefaults": "Reset",
+  "resetDefaultsDescription": "Put the mouse back to its factory settings.",
+  "resetDefaultsButton": "Reset to defaults",
+  "resetDefaultsConfirmTitle": "Reset to defaults?",
+  "resetDefaultsConfirmDescription": "Every setting on the mouse, including button assignments, is overwritten with the factory values.",
+  "resetDefaultsProgress": "Resetting"
 }
