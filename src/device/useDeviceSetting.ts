@@ -20,7 +20,7 @@ export class ReadbackMismatchError<T> extends Error {
   }
 }
 
-function useDeviceBusy(): boolean {
+export function useDeviceBusy(): boolean {
   const fetching = useIsFetching();
   const mutating = useIsMutating();
   return fetching + mutating > 0;
