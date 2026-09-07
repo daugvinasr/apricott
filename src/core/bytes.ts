@@ -66,6 +66,16 @@ export class Frame {
     return new Frame(this.#bytes.subarray(n));
   }
 
+  bytes(start: number, length: number): Uint8Array {
+    if (start + length > this.length) {
+      throw new TransportError(
+        `Frame range ${start}+${length} out of range (length ${this.length})`,
+      );
+    }
+
+    return this.#bytes.subarray(start, start + length);
+  }
+
   /** Asserts byte 0 is `value` and returns the frame after it. */
   expect(value: number, label: string): Frame {
     const actual = this.u8(0);

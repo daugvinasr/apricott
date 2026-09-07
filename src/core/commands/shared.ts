@@ -4,6 +4,10 @@ export interface Bus {
   readonly wireless: boolean;
   read(op: number, args?: number[]): Promise<Frame>;
   write(op: number, args?: number[]): Promise<void>;
+  /** Feature write followed by an output report carrying `data`. */
+  writeBlock(op: number, args: number[], data: Uint8Array): Promise<void>;
+  /** Feature read whose reply is a bare payload without the op echo. */
+  readBlock(op: number, args: number[]): Promise<Frame>;
 }
 
 export const Op = {
@@ -13,6 +17,7 @@ export const Op = {
   sensorOptions: 0x04,
   timingOptions: 0x05,
   button: 0x06,
+  macro: 0x07,
   wirelessLink: 0x0e,
   identity: 0x0f,
 } as const;

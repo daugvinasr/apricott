@@ -21,17 +21,21 @@ const TARGET = VENDOR_USAGE_PAGE * 0x10000 + VENDOR_FEATURE_USAGE;
 const READ_FLAG = 0x80;
 const WRITE_GAP_MS = 500;
 const READ_GAP_MS = 30;
+const BLOCK_HEADER_GAP_MS = 40;
+const BLOCK_DATA_GAP_MS = 60;
+const BLOCK_READ_GAP_MS = 120;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-interface FeatureReportInfo {
+interface VendorReports {
   reportId: number;
   payloadLength: number;
+  outputLength: number;
 }
 
-function findFeatureReport(device: HIDDevice): FeatureReportInfo | null {
-  const report = device.collections
-    .filter((c) => c.usagePage === VENDOR_USAGE_PAGE)
+function findVendorReports(device: HIDDevice): VendorReports | null {
+  const vendor = device.collections.filter((c) => c.usagePage === VENDOR_USAGE_PAGE);
+  const report = vendor
     .flatMap((c) => c.featureReports ?? [])
     .find((r) => r.items?.some((i) => i.usages?.includes(TARGET)));
 
@@ -42,21 +46,30 @@ function findFeatureReport(device: HIDDevice): FeatureReportInfo | null {
     return null;
   }
 
-  return { reportId, payloadLength };
+  const output = vendor.flatMap((c) => c.outputReports ?? []).find((r) => r.reportId === reportId);
+  const outputLength = output?.items?.[0]?.reportCount;
+
+  if (outputLength === undefined) {
+    return null;
+  }
+
+  return { reportId, payloadLength, outputLength };
 }
 
 export class Transport implements Bus {
   readonly device: HIDDevice;
   readonly reportId: number;
   readonly payloadLength: number;
+  readonly outputLength: number;
   readonly wireless: boolean; // using wireless dongle
 
   private inputListener: ((data: Uint8Array) => void) | null = null;
 
-  private constructor(device: HIDDevice, info: FeatureReportInfo) {
+  private constructor(device: HIDDevice, info: VendorReports) {
     this.device = device;
     this.reportId = info.reportId;
     this.payloadLength = info.payloadLength;
+    this.outputLength = info.outputLength;
     this.wireless = device.productId === PRODUCT_ID_DONGLE;
 
     device.oninputreport = (e) => {
@@ -68,7 +81,7 @@ export class Transport implements Bus {
 
   static async open(devices: HIDDevice[]): Promise<Transport> {
     for (const device of devices) {
-      const info = findFeatureReport(device);
+      const info = findVendorReports(device);
 
       if (!info) {
         continue;
@@ -82,7 +95,7 @@ export class Transport implements Bus {
     }
 
     throw new TransportError(
-      `No device with the vendor feature report (${hex(VENDOR_USAGE_PAGE)}/${hex(VENDOR_FEATURE_USAGE)})`,
+      `No device with the vendor feature and output reports (${hex(VENDOR_USAGE_PAGE)}/${hex(VENDOR_FEATURE_USAGE)})`,
     );
   }
 
@@ -127,25 +140,57 @@ export class Transport implements Bus {
     });
   }
 
-  async read(op: number, args: number[] = []): Promise<Frame> {
+  private async receive(readOp: number): Promise<Frame> {
+    const view = await this.device.receiveFeatureReport(this.reportId);
+
+    // receiveFeatureReport includes the leading report-ID byte, strip it
+    const rdata = new Uint8Array(view.buffer, view.byteOffset + 1, view.byteLength - 1).slice();
+
+    if (rdata.length !== this.payloadLength) {
+      throw new TransportError(
+        `Short frame for ${hex(readOp)}: got ${rdata.length} bytes, expected ${this.payloadLength}`,
+      );
+    }
+
+    return new Frame(rdata);
+  }
+
+  private exchange(op: number, args: number[], gapMs: number): Promise<Frame> {
     const readOp = op | READ_FLAG;
     const payload = this.buildPayload(readOp, args);
 
     return this.enqueue(async () => {
       await this.device.sendFeatureReport(this.reportId, payload);
-      await sleep(READ_GAP_MS);
-      const view = await this.device.receiveFeatureReport(this.reportId);
+      await sleep(gapMs);
+      return this.receive(readOp);
+    });
+  }
 
-      // receiveFeatureReport INCLUDES the leading report-ID byte; strip it.
-      const rdata = new Uint8Array(view.buffer, view.byteOffset + 1, view.byteLength - 1).slice();
+  async read(op: number, args: number[] = []): Promise<Frame> {
+    return (await this.exchange(op, args, READ_GAP_MS)).expect(op | READ_FLAG, "Op echo");
+  }
 
-      if (rdata.length !== this.payloadLength) {
-        throw new TransportError(
-          `Short frame for ${hex(readOp)}: got ${rdata.length} bytes, expected ${this.payloadLength}`,
-        );
-      }
+  readBlock(op: number, args: number[]): Promise<Frame> {
+    return this.exchange(op, args, BLOCK_READ_GAP_MS);
+  }
 
-      return new Frame(rdata).expect(readOp, "Op echo");
+  async writeBlock(op: number, args: number[], data: Uint8Array): Promise<void> {
+    const header = this.buildPayload(op, args);
+
+    if (data.length > this.outputLength) {
+      throw new TransportError(
+        `Block for ${hex(op)} is ${data.length} bytes, max ${this.outputLength}`,
+      );
+    }
+
+    const report = new Uint8Array(this.outputLength);
+    report.set(data);
+
+    return this.enqueue(async () => {
+      await this.device.sendFeatureReport(this.reportId, header);
+      await sleep(BLOCK_HEADER_GAP_MS);
+      await this.device.sendReport(this.reportId, report);
+      await sleep(BLOCK_DATA_GAP_MS);
     });
   }
 }
