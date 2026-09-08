@@ -11,3 +11,4 @@ export * from "./sleep";
 export * from "./buttons";
 export * from "./identity";
 export * from "./input-report";
+export * from "./defaults";
