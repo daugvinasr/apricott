@@ -14,6 +14,8 @@
   "linkWireless8k": "wireless, 8K receiver",
   "sensorAndLink": "{sensor}, {link}",
   "mouseTopView": "{name} mouse, top view",
+  "settings": "Settings",
+  "buttons": "Buttons",
   "waitingForReport": "Waiting for the mouse to report in…",
   "battery": "Battery",
   "batteryLevel": "{percent}%",
