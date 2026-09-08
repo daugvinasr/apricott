@@ -19,11 +19,15 @@ import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import GitHubIcon from "./components/GitHubIcon";
 import { Divider } from "@astryxdesign/core/Divider";
-import type { ReactNode } from "react";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
+import { type ReactNode, useState } from "react";
+
+const VIEWS = ["settings", "buttons"] as const;
+type View = (typeof VIEWS)[number];
 
 function Settings() {
   return (
-    <VStack maxWidth={760}>
+    <VStack>
       <PollingRatePanel />
       <Divider isFullBleed />
       <LiftOffPanel />
@@ -70,6 +74,24 @@ function Shell({ start, content }: { start?: ReactNode; content: ReactNode }) {
   );
 }
 
+function Tabbed() {
+  const [view, setView] = useState<View>("settings");
+
+  return (
+    <VStack maxWidth={760} gap={6}>
+      <TabList
+        value={view}
+        onChange={(v) => setView(VIEWS.find((x) => x === v) ?? view)}
+        hasDivider
+      >
+        <Tab value="settings" label={m.settings()} />
+        <Tab value="buttons" label={m.buttons()} />
+      </TabList>
+      {view === "settings" && <Settings />}
+    </VStack>
+  );
+}
+
 function Configurator() {
   const { device, connect } = useConnection();
 
@@ -88,7 +110,7 @@ function Configurator() {
             </VStack>
           </LayoutPanel>
         }
-        content={<Settings />}
+        content={<Tabbed />}
       />
     </Connected>
   );
