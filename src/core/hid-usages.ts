@@ -137,7 +137,6 @@ export const KEY_BY_USAGE = invert(KEY_USAGE);
 
 const isKeyName = (name: string): name is KeyName => Object.hasOwn(KEY_USAGE, name);
 
-// Modifiers are one contiguous usage range
 export const isModifierUsage = (usage: number): boolean =>
   usage >= KEY_USAGE.controlLeft && usage <= KEY_USAGE.metaRight;
 

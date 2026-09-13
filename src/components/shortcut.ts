@@ -2,7 +2,7 @@ import { hex } from "@/core/bytes";
 import type { ButtonAction } from "@/core/commands";
 import { KEY_BY_USAGE, KEY_USAGE, type KeyName } from "@/core/hid-usages";
 
-// Only keys Kbd would not spell right from their name. Kbd splits on +, so plus is spelled out
+// Kbd splits on +, so plus is spelled out
 const KEY_DISPLAY = new Map(
   Object.entries({
     controlLeft: "ctrl",
