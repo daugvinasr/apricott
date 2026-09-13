@@ -19,6 +19,7 @@ export function useResetDefaults() {
 
   return {
     reset: mutation.mutate,
+    clearError: mutation.reset,
     isPending: mutation.isPending,
     progress,
     error: mutation.error,

@@ -11,7 +11,7 @@ import SleepTimerPanel from "./components/SleepTimerPanel";
 import DebouncePanel from "./components/DebouncePanel";
 import PerformanceModePanel from "./components/PerformanceModePanel";
 import SensorTogglesPanel from "./components/SensorTogglesPanel";
-import ResetDefaultsPanel from "./components/ResetDefaultsPanel";
+import ResetDefaultsButton from "./components/ResetDefaultsButton";
 import { Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
@@ -20,11 +20,24 @@ import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import GitHubIcon from "./components/GitHubIcon";
 import { Divider } from "@astryxdesign/core/Divider";
-import type { ReactNode } from "react";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
+import { type ReactNode, useState } from "react";
+import * as stylex from "@stylexjs/stylex";
+
+const VIEWS = ["settings", "buttons"] as const;
+type View = (typeof VIEWS)[number];
+
+function isView(value: string): value is View {
+  return VIEWS.some((view) => view === value);
+}
+
+const styles = stylex.create({
+  tabActions: { marginInlineStart: "auto" },
+});
 
 function Settings() {
   return (
-    <VStack maxWidth={760}>
+    <VStack>
       <PollingRatePanel />
       <Divider isFullBleed />
       <LiftOffPanel />
@@ -38,8 +51,6 @@ function Settings() {
       <SensorTogglesPanel />
       <Divider isFullBleed />
       <DpiPanel />
-      <Divider isFullBleed />
-      <ResetDefaultsPanel />
     </VStack>
   );
 }
@@ -73,8 +84,30 @@ function Shell({ start, content }: { start?: ReactNode; content: ReactNode }) {
   );
 }
 
+function Tabbed({ view, onChange }: { view: View; onChange: (view: View) => void }) {
+  return (
+    <VStack maxWidth={760} gap={6}>
+      <TabList
+        value={view}
+        onChange={(value) => {
+          if (isView(value)) onChange(value);
+        }}
+        hasDivider
+      >
+        <Tab value="settings" label={m.settings()} />
+        {import.meta.env.DEV && <Tab value="buttons" label={m.buttons()} />}
+        <HStack xstyle={styles.tabActions} align="center">
+          <ResetDefaultsButton />
+        </HStack>
+      </TabList>
+      {view === "settings" && <Settings />}
+    </VStack>
+  );
+}
+
 function Configurator() {
   const { device, connect } = useConnection();
+  const [view, setView] = useState<View>("settings");
 
   if (!device) {
     return <Shell content={<Landing onConnect={connect} />} />;
@@ -86,12 +119,12 @@ function Configurator() {
         start={
           <LayoutPanel width={360} hasDivider label={m.device()} padding={6}>
             <VStack gap={6}>
-              <DeviceHero identity={device.identity} />
+              <DeviceHero identity={device.identity} showButtons={view === "buttons"} />
               <InputReportPanel />
             </VStack>
           </LayoutPanel>
         }
-        content={<Settings />}
+        content={<Tabbed view={view} onChange={setView} />}
       />
     </Connected>
   );

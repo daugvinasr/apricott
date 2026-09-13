@@ -13,6 +13,10 @@ export const BUTTON_MATRIX = {
 
 export type ButtonName = keyof typeof BUTTON_MATRIX;
 
+export const BUTTON_NAMES =
+  // SAFETY: BUTTON_MATRIX is a const object, so its keys are exactly ButtonName
+  Object.keys(BUTTON_MATRIX) as ButtonName[];
+
 const MOUSE_SELECTOR = {
   left: 0xf0,
   right: 0xf1,
