@@ -1,3 +1,6 @@
+import { invert } from "./bytes";
+
+// Names mirror KeyboardEvent.code with a lower-cased first letter, minus the Key prefix
 export const KEY_USAGE = {
   a: 0x04,
   b: 0x05,
@@ -129,3 +132,22 @@ export const MULTIMEDIA_USAGE = {
 } as const;
 
 export type MultimediaKey = keyof typeof MULTIMEDIA_USAGE;
+
+export const KEY_BY_USAGE = invert(KEY_USAGE);
+
+const isKeyName = (name: string): name is KeyName => Object.hasOwn(KEY_USAGE, name);
+
+// Modifiers are one contiguous usage range
+export const isModifierUsage = (usage: number): boolean =>
+  usage >= KEY_USAGE.controlLeft && usage <= KEY_USAGE.metaRight;
+
+export function keyNameFromCode(code: string): KeyName | undefined {
+  const bare = /^Key[A-Z]$/.test(code) ? code.slice(3) : code;
+  const name = bare.charAt(0).toLowerCase() + bare.slice(1);
+  return isKeyName(name) ? name : undefined;
+}
+
+export function usageFromCode(code: string): number | undefined {
+  const name = keyNameFromCode(code);
+  return name && KEY_USAGE[name];
+}

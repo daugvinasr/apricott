@@ -1,11 +1,15 @@
 import { TransportError } from "./errors";
 
-export const hex = (n: number) => `0x${n.toString(16).padStart(2, "0")}`;
+export const hex = (n: number, digits = 2) => `0x${n.toString(16).padStart(digits, "0")}`;
 
 const lo = (n: number) => n & 0xff;
 const hi = (n: number) => (n >> 8) & 0xff;
 
 export const le16Bytes = (n: number): [number, number] => [lo(n), hi(n)];
+
+export const keysOf = <K extends string, V>(rec: Record<K, V>): K[] =>
+  // SAFETY: sound only for literals whose type lists every key
+  Object.keys(rec) as K[];
 
 /** Type guard for membership in a `{ name: number }` table. */
 export function isValueOf<T extends Record<string, number>>(table: T) {

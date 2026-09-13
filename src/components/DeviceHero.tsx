@@ -1,5 +1,5 @@
 import { m } from "@/paraglide/messages";
-import { type Identity, MODEL_NAMES, Sensor } from "@/core/commands";
+import { type ButtonName, type Identity, MODEL_NAMES, Sensor } from "@/core/commands";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Section } from "@astryxdesign/core/Section";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
@@ -18,9 +18,11 @@ function linkLabel(link: Identity["link"]): string {
 export default function DeviceHero({
   identity,
   showButtons = false,
+  highlightedButton,
 }: {
   identity: Identity;
   showButtons?: boolean;
+  highlightedButton?: ButtonName;
 }) {
   const name = MODEL_NAMES[identity.model];
   const render = renderFor(identity.model);
@@ -36,6 +38,7 @@ export default function DeviceHero({
                 name={name}
                 markers={render.markers}
                 areMarkersVisible={showButtons}
+                highlightedButton={highlightedButton}
               />
             ) : (
               <MissingRender name={name} />

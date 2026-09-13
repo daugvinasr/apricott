@@ -1,4 +1,4 @@
-import { LiftOff, Sensor } from "@/core/commands";
+import { type ButtonName, LiftOff, type MouseButton, Sensor } from "@/core/commands";
 import { m } from "@/paraglide/messages";
 
 export const LIFT_OFF_LABELS = {
@@ -15,3 +15,16 @@ export const SENSOR_LABELS = {
 export function formatSeconds(s: number): string {
   return s < 60 ? m.seconds({ value: s }) : m.minutes({ value: s / 60 });
 }
+
+export const MOUSE_LABELS = {
+  left: m.leftClick(),
+  right: m.rightClick(),
+  middle: m.middleClick(),
+  back: m.back(),
+  forward: m.forward(),
+} satisfies Record<MouseButton, string>;
+
+export const BUTTON_LABELS = {
+  ...MOUSE_LABELS,
+  dpi: m.dpiButton(),
+} satisfies Record<ButtonName, string>;

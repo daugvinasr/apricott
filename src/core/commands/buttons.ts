@@ -1,4 +1,4 @@
-import { invert, packLe32, unpackLe32 } from "../bytes";
+import { invert, keysOf, packLe32, unpackLe32 } from "../bytes";
 import { KEY_USAGE, type KeyName } from "../hid-usages";
 import { type Bus, Op, readSub } from "./shared";
 
@@ -13,9 +13,7 @@ export const BUTTON_MATRIX = {
 
 export type ButtonName = keyof typeof BUTTON_MATRIX;
 
-export const BUTTON_NAMES =
-  // SAFETY: BUTTON_MATRIX is a const object, so its keys are exactly ButtonName
-  Object.keys(BUTTON_MATRIX) as ButtonName[];
+export const BUTTON_NAMES = keysOf(BUTTON_MATRIX);
 
 const MOUSE_SELECTOR = {
   left: 0xf0,
