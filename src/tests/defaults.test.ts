@@ -1,12 +1,12 @@
 import { expect, it } from "vite-plus/test";
-import { factoryDefaults, resetToDefaults, Sensor } from "@/core/commands";
+import { FACTORY_DEFAULTS, resetToDefaults, Sensor } from "@/core/commands";
 import { fakeBus } from "./fake-bus";
 
 const dpiWrites = (axis: number) =>
   [7, 15, 31, 47, 63, 127].map((hw, stage) => ({ op: 0x02, args: [stage, hw, 0, 0, 0, 0, axis] }));
 
 it("dpi defaults are 400 to 6400", () => {
-  expect(factoryDefaults().dpi.map((s) => s.dpi)).toEqual([400, 800, 1600, 2400, 3200, 6400]);
+  expect(FACTORY_DEFAULTS.dpi.map((s) => s.dpi)).toEqual([400, 800, 1600, 2400, 3200, 6400]);
 });
 
 it("writes every default and reports progress", async () => {

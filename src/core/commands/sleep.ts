@@ -9,8 +9,6 @@ export const SLEEP_TIMERS = [
 
 export type SleepTimer = (typeof SLEEP_TIMERS)[number];
 
-export const DEFAULT_SLEEP_TIMER: SleepTimer = 60;
-
 const SLEEP_TIMER_SET: ReadonlySet<number> = new Set(SLEEP_TIMERS);
 
 export const isSleepTimer = (seconds: number): seconds is SleepTimer =>

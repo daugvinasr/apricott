@@ -5,24 +5,25 @@ import { Button } from "@astryxdesign/core/Button";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { HStack, Layout, LayoutContent, LayoutFooter } from "@astryxdesign/core/Layout";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
+import { VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { useState } from "react";
 import SettingError from "./SettingError";
-import SettingSection from "./SettingSection";
 
-export default function ResetDefaultsPanel() {
+export default function ResetDefaultsButton() {
   const [isOpen, setOpen] = useState(false);
   const busy = useDeviceBusy();
-  const { reset, isPending, progress, error } = useResetDefaults();
+  const { reset, clearError, isPending, progress, error } = useResetDefaults();
 
+  const open = () => {
+    clearError();
+    setOpen(true);
+  };
   const close = () => setOpen(false);
 
   return (
-    <SettingSection title={m.resetDefaults()} description={m.resetDefaultsDescription()}>
-      <HStack>
-        <Button label={m.resetDefaultsButton()} isDisabled={busy} onClick={() => setOpen(true)} />
-      </HStack>
-      <SettingError error={error} />
+    <>
+      <Button label={m.resetDefaultsButton()} variant="ghost" isDisabled={busy} onClick={open} />
       <Dialog isOpen={isOpen} onOpenChange={setOpen} purpose="required">
         {isPending ? (
           <Layout
@@ -42,7 +43,10 @@ export default function ResetDefaultsPanel() {
             header={<DialogHeader title={m.resetDefaultsConfirmTitle()} onOpenChange={setOpen} />}
             content={
               <LayoutContent>
-                <Text>{m.resetDefaultsConfirmDescription()}</Text>
+                <VStack gap={3}>
+                  <Text>{m.resetDefaultsConfirmDescription()}</Text>
+                  <SettingError error={error} />
+                </VStack>
               </LayoutContent>
             }
             footer={
@@ -52,7 +56,7 @@ export default function ResetDefaultsPanel() {
                   <Button
                     label={m.resetDefaultsButton()}
                     variant="destructive"
-                    onClick={() => reset(undefined, { onSettled: close })}
+                    onClick={() => reset(undefined, { onSuccess: close })}
                   />
                 </HStack>
               </LayoutFooter>
@@ -60,6 +64,6 @@ export default function ResetDefaultsPanel() {
           />
         )}
       </Dialog>
-    </SettingSection>
+    </>
   );
 }

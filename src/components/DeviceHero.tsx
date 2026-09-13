@@ -5,6 +5,7 @@ import { Section } from "@astryxdesign/core/Section";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
+import { MARKED_RENDER_WIDTH } from "./ButtonMarkers";
 import { MissingRender, ModelRender } from "./ModelRender";
 import { SENSOR_LABELS } from "./labels";
 import { renderFor } from "./renders";
@@ -14,16 +15,31 @@ function linkLabel(link: Identity["link"]): string {
   return link.receiver8k ? m.linkWireless8k() : m.linkWireless();
 }
 
-export default function DeviceHero({ identity }: { identity: Identity }) {
+export default function DeviceHero({
+  identity,
+  showButtons = false,
+}: {
+  identity: Identity;
+  showButtons?: boolean;
+}) {
   const name = MODEL_NAMES[identity.model];
-  const src = renderFor(identity.model);
+  const render = renderFor(identity.model);
 
   return (
     <VStack gap={6}>
       <Section variant="muted" padding={8}>
         <VStack align="center">
-          <VStack width={200}>
-            {src ? <ModelRender src={src} name={name} /> : <MissingRender name={name} />}
+          <VStack width={MARKED_RENDER_WIDTH}>
+            {render ? (
+              <ModelRender
+                src={render.src}
+                name={name}
+                markers={render.markers}
+                areMarkersVisible={showButtons}
+              />
+            ) : (
+              <MissingRender name={name} />
+            )}
           </VStack>
         </VStack>
       </Section>
