@@ -29,7 +29,12 @@ export default function Landing({ onConnect }: { onConnect: () => Promise<void> 
       <HStack gap={4} justify="center" align="end">
         {LINEUP.map((mouse, i) => (
           <VStack key={mouse.name} gap={3} align="center" width={112}>
-            <ModelRender src={mouse.src} name={mouse.name} delayMs={i * STAGGER_MS} />
+            <ModelRender
+              src={mouse.src}
+              name={mouse.name}
+              hasShadow={false}
+              delayMs={i * STAGGER_MS}
+            />
             <Text type="supporting">{mouse.name}</Text>
           </VStack>
         ))}

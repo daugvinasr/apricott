@@ -1,4 +1,5 @@
 import { m } from "@/paraglide/messages";
+import type { ButtonName } from "@/core/commands";
 import { Connected, DeviceProvider } from "./device/connection";
 import { useConnection } from "./device/context";
 import DeviceHero from "./components/DeviceHero";
@@ -12,6 +13,7 @@ import DebouncePanel from "./components/DebouncePanel";
 import PerformanceModePanel from "./components/PerformanceModePanel";
 import SensorTogglesPanel from "./components/SensorTogglesPanel";
 import ResetDefaultsButton from "./components/ResetDefaultsButton";
+import ButtonsPanel from "./components/ButtonsPanel";
 import { Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
@@ -24,7 +26,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { type ReactNode, useState } from "react";
 import * as stylex from "@stylexjs/stylex";
 
-const VIEWS = ["settings", "buttons"] as const;
+const VIEWS = ["settings", "dpi", "buttons"] as const;
 type View = (typeof VIEWS)[number];
 
 function isView(value: string): value is View {
@@ -37,7 +39,7 @@ const styles = stylex.create({
 
 function Settings() {
   return (
-    <VStack>
+    <VStack paddingBlockStart={6}>
       <PollingRatePanel />
       <Divider isFullBleed />
       <LiftOffPanel />
@@ -49,8 +51,6 @@ function Settings() {
       <DebouncePanel />
       <Divider isFullBleed />
       <SensorTogglesPanel />
-      <Divider isFullBleed />
-      <DpiPanel />
     </VStack>
   );
 }
@@ -84,9 +84,17 @@ function Shell({ start, content }: { start?: ReactNode; content: ReactNode }) {
   );
 }
 
-function Tabbed({ view, onChange }: { view: View; onChange: (view: View) => void }) {
+function Tabbed({
+  view,
+  onChange,
+  children,
+}: {
+  view: View;
+  onChange: (view: View) => void;
+  children: ReactNode;
+}) {
   return (
-    <VStack maxWidth={760} gap={6}>
+    <VStack maxWidth={760}>
       <TabList
         value={view}
         onChange={(value) => {
@@ -95,12 +103,13 @@ function Tabbed({ view, onChange }: { view: View; onChange: (view: View) => void
         hasDivider
       >
         <Tab value="settings" label={m.settings()} />
-        {import.meta.env.DEV && <Tab value="buttons" label={m.buttons()} />}
+        <Tab value="dpi" label={m.dpi()} />
+        <Tab value="buttons" label={m.buttons()} />
         <HStack xstyle={styles.tabActions} align="center">
           <ResetDefaultsButton />
         </HStack>
       </TabList>
-      {view === "settings" && <Settings />}
+      {children}
     </VStack>
   );
 }
@@ -108,10 +117,18 @@ function Tabbed({ view, onChange }: { view: View; onChange: (view: View) => void
 function Configurator() {
   const { device, connect } = useConnection();
   const [view, setView] = useState<View>("settings");
+  const [hoveredButton, setHoveredButton] = useState<ButtonName>();
 
   if (!device) {
     return <Shell content={<Landing onConnect={connect} />} />;
   }
+
+  const isButtonsView = view === "buttons";
+
+  const changeView = (next: View) => {
+    setView(next);
+    setHoveredButton(undefined);
+  };
 
   return (
     <Connected>
@@ -119,12 +136,22 @@ function Configurator() {
         start={
           <LayoutPanel width={360} hasDivider label={m.device()} padding={6}>
             <VStack gap={6}>
-              <DeviceHero identity={device.identity} showButtons={view === "buttons"} />
+              <DeviceHero
+                identity={device.identity}
+                showButtons={isButtonsView}
+                highlightedButton={hoveredButton}
+              />
               <InputReportPanel />
             </VStack>
           </LayoutPanel>
         }
-        content={<Tabbed view={view} onChange={setView} />}
+        content={
+          <Tabbed view={view} onChange={changeView}>
+            {view === "settings" && <Settings />}
+            {view === "dpi" && <DpiPanel />}
+            {isButtonsView && <ButtonsPanel onHover={setHoveredButton} />}
+          </Tabbed>
+        }
       />
     </Connected>
   );

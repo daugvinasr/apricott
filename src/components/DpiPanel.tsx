@@ -10,7 +10,7 @@ import { Switch } from "@astryxdesign/core/Switch";
 import { useState } from "react";
 import ChoiceGroup from "./ChoiceGroup";
 import SettingError from "./SettingError";
-import SettingSection from "./SettingSection";
+import TabPanel from "./TabPanel";
 
 function withDpi(pair: DpiStagePair, x: number, y: number): DpiStagePair {
   return { x: { ...pair.x, dpi: x }, y: { ...pair.y, dpi: y } };
@@ -120,7 +120,7 @@ export default function DpiPanel() {
   const syncXY = () => dpi.set(pairs.map((p) => withDpi(p, p.x.dpi, p.x.dpi)));
 
   return (
-    <SettingSection title={m.dpi()} description={m.dpiDescription()}>
+    <TabPanel title={m.dpi()} description={m.dpiDescription()}>
       <HStack gap={4} align="end">
         <NumberInput
           label={m.stages()}
@@ -170,6 +170,6 @@ export default function DpiPanel() {
       )}
       <SettingError error={stages.error} />
       <SettingError error={dpi.error} />
-    </SettingSection>
+    </TabPanel>
   );
 }

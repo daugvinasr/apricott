@@ -34,6 +34,17 @@ const styles = stylex.create({
   visible: {
     opacity: 1,
   },
+  marker: {
+    transitionProperty: "opacity",
+    transitionDuration: {
+      default: "0s",
+      "@media (prefers-reduced-motion: no-preference)": "var(--duration-fast)",
+    },
+    transitionTimingFunction: "var(--ease-standard)",
+  },
+  dimmed: {
+    opacity: 0.25,
+  },
   leader: {
     stroke: "var(--color-border-emphasized)",
     strokeWidth: 1,
@@ -62,29 +73,72 @@ function leaderPoints(bx: number, by: number, [tx, ty]: ButtonMarker["target"]):
   return `${bx},${by} ${elbowX},${by} ${tx},${ty}`;
 }
 
-function Marker({ name, marker }: { name: ButtonName; marker: ButtonMarker }) {
+function Badge({ cx, cy, name }: { cx: number; cy: number; name: ButtonName }) {
+  return (
+    <>
+      <circle cx={cx} cy={cy} r={BADGE_RADIUS} {...stylex.props(styles.badge)} />
+      <text x={cx} y={cy} {...stylex.props(styles.label)}>
+        {BUTTON_MATRIX[name] + 1}
+      </text>
+    </>
+  );
+}
+
+function Marker({
+  name,
+  marker,
+  isDimmed,
+}: {
+  name: ButtonName;
+  marker: ButtonMarker;
+  isDimmed: boolean;
+}) {
   const bx = BADGE_X[name];
   const by = marker.badgeY;
   const [tx, ty] = marker.target;
 
   return (
-    <g>
+    <g {...stylex.props(styles.marker, isDimmed && styles.dimmed)}>
       <polyline points={leaderPoints(bx, by, marker.target)} {...stylex.props(styles.leader)} />
       <circle cx={tx} cy={ty} r={TARGET_RADIUS} {...stylex.props(styles.target)} />
-      <circle cx={bx} cy={by} r={BADGE_RADIUS} {...stylex.props(styles.badge)} />
-      <text x={bx} y={by} {...stylex.props(styles.label)}>
-        {BUTTON_MATRIX[name] + 1}
-      </text>
+      <Badge cx={bx} cy={by} name={name} />
     </g>
   );
 }
 
-export function ButtonMarkers({ markers, isVisible }: { markers: Markers; isVisible: boolean }) {
+export function ButtonBadge({ name }: { name: ButtonName }) {
+  const size = 2 * BADGE_RADIUS;
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+      <Badge cx={BADGE_RADIUS} cy={BADGE_RADIUS} name={name} />
+    </svg>
+  );
+}
+
+export function ButtonMarkers({
+  markers,
+  isVisible,
+  highlightedButton,
+}: {
+  markers: Markers;
+  isVisible: boolean;
+  highlightedButton?: ButtonName;
+}) {
   return (
     <g {...stylex.props(styles.markers, isVisible && styles.visible)}>
       {BUTTON_NAMES.map((name) => {
         const marker = markers[name];
-        return marker && <Marker key={name} name={name} marker={marker} />;
+        return (
+          marker && (
+            <Marker
+              key={name}
+              name={name}
+              marker={marker}
+              isDimmed={highlightedButton !== undefined && highlightedButton !== name}
+            />
+          )
+        );
       })}
     </g>
   );

@@ -1,4 +1,5 @@
 import { m } from "@/paraglide/messages";
+import type { ButtonName } from "@/core/commands";
 import { Heading } from "@astryxdesign/core/Heading";
 import { VStack } from "@astryxdesign/core/Stack";
 import * as stylex from "@stylexjs/stylex";
@@ -34,12 +35,16 @@ export function ModelRender({
   name,
   markers,
   areMarkersVisible = false,
+  highlightedButton,
+  hasShadow = true,
   delayMs = 0,
 }: {
   src: string;
   name: string;
   markers?: Markers;
   areMarkersVisible?: boolean;
+  highlightedButton?: ButtonName;
+  hasShadow?: boolean;
   delayMs?: number;
 }) {
   const label = areMarkersVisible ? m.mouseButtonLayout({ name }) : m.mouseTopView({ name });
@@ -56,9 +61,15 @@ export function ModelRender({
         href={src}
         width={RENDER_WIDTH}
         height={RENDER_HEIGHT}
-        {...stylex.props(styles.image)}
+        {...stylex.props(hasShadow && styles.image)}
       />
-      {markers && <ButtonMarkers markers={markers} isVisible={areMarkersVisible} />}
+      {markers && (
+        <ButtonMarkers
+          markers={markers}
+          isVisible={areMarkersVisible}
+          highlightedButton={highlightedButton}
+        />
+      )}
     </svg>
   );
 }
